@@ -316,6 +316,7 @@ namespace InventoryManagement.Controllers
         }
         // POST: SaveProductMaster
         [HttpPost]
+        [ValidateInput(false)]
         public ActionResult SaveProductMaster(ProductDetails model)
         {
             ResponseDetail objResponse = new ResponseDetail();
@@ -400,6 +401,7 @@ namespace InventoryManagement.Controllers
 
 
         [HttpPost]
+        [ValidateInput(false)]
         public ActionResult EditProductMaster(ProductDetails model)
         {
             ResponseDetail objResponse = new ResponseDetail();
