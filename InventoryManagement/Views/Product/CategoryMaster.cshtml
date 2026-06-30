@@ -3,14 +3,12 @@
     ViewBag.Title = "CategoryMaster";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
 <style type="text/css">
-     .gj-grid-wrapper {
-    min-width:100%!important;
-    overflow-x:scroll!important;
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
     }
 </style>
-
 <script type="text/javascript">
     $(document).ready(function () {
         $(".preloader").hide();
@@ -56,21 +54,25 @@
                         $('#grid').empty();
 
                     }
-                  
+
 
                     if (resultData != null) {
                         var i = 0;
 
                         for (i = 0; i < resultData.length; i++) {
-                            //var imageUrl = "/ProductImages";
+                            // DB me sirf filename save hota hai; display ke liye folder path lagao.
+                            var rawImg = resultData[i].ImgPath || "";
+                            var displayImg = rawImg ? ("/CategoryImages/" + rawImg) : "/images/DefaultProduct.jpg";
 
-                            //var productPicFileName = imageUrl + "/" + resultData[i].ImagePath;
-                            var productPicFileName =  resultData[i].ImagePath;
-                            //var productPic = resultData[i].ProductImagePath;
-                            //var productPicFileName = productPic.replace(/^.*[\\\/]/, '');
-                            //productPicFileName = productPic.replace(/\s/g, "%20");
-                          
-                            CategoryGrid.push({ "SNo": (i + 1), "CategoryId": resultData[i].CategoryId, "CategoryName": resultData[i].CategoryName, "Description": resultData[i].Description, "Status": (resultData[i].IsActive) ? "Active" : "Inactive", "ProductImage": productPicFileName });
+                            CategoryGrid.push({
+                                "SNo": (i + 1),
+                                "CategoryId": resultData[i].CategoryId,
+                                "CategoryName": resultData[i].CategoryName,
+                                "Description": resultData[i].Description,
+                                "Status": (resultData[i].IsActive) ? "Active" : "Inactive",
+                                "ProductImage": displayImg,   // grid me dikhane wala path
+                                "ImgPath": rawImg             // raw filename (hidden field / edit ke liye)
+                            });
                         }
                        // CategoryGrid = CategoryGrid.splice(1);
                         $("#noRecord").hide();
@@ -84,7 +86,7 @@
                                 { field: 'CategoryName', title: 'Category Name', width: 250, sortable: true, filterable: true },
                                  { field: 'Description', title: 'Description', width: 400, sortable: true, filterable: true },
                                 { field: 'Status', title: 'Status', width: 100, sortable: true, filterable: true },
-                               { title: 'Product Image', width: 120, tmpl: "<img src={ProductImage} width='100' height='100' alt='No Image'/>", align: 'center', filterable: false },
+                               { title: 'Category Image', width: 120, tmpl: "<img src={ProductImage} width='100' height='100' alt='No Image'/>", align: 'center', filterable: false },
                     //{ title: '', field: 'Edit', width: 34, type: 'icon', icon: 'glyphicon-pencil', tooltip: 'Edit', events: { 'click': Edit }, filterable: false },
                    { title: '', field: 'Delete', type: 'icon', width: 30,hidden:CanEdit, icon: 'glyphicon-remove', tooltip: 'Delete', events: { 'click': Delete }, filterable: false }
                             ],
@@ -117,7 +119,7 @@
                 $("#isAdd").val("Add");
                 $("#CategoryId").val(0);
             }
-           
+
             Save();
         });
 
@@ -181,6 +183,7 @@
                 console.log(e);
 
                 $("#CategoryId").val(e.data.record.CategoryId);
+                $("#hiddenImgPath").val(e.data.record.ImgPath || "");
                 if (e.data.record.ActiveStatus == "Active") {
                     $("#StatusActive").prop('checked', true);
                     $("#StatusInActive").prop('checked', false);
@@ -220,6 +223,11 @@
             $("#isAdd").val("Edit");
             $("#categoryname").val(record.CategoryName);
             $("#description").val(record.Description);
+
+            // raw filename hidden field me rakho, taaki nayi image na aaye to
+            // edit-save par purani image DB me bani rahe (null na jaaye).
+            $("#hiddenImgPath").val(record.ImgPath || "");
+
             if (record.ProductImage == null)
             {
                 $('#ProductImage').attr('src', '/images/DefaultProduct.jpg');
@@ -227,7 +235,7 @@
             else {
                 $('#ProductImage').attr('src', record.ProductImage);
             }
-         
+
             $('input[name=IsActive]').attr('checked', false);
             console.log(record.Status);
             if (record.Status == "Active") {
@@ -285,7 +293,7 @@
         });*@
 
         //$("#categoryname").focusout(function () {
-           
+
         //});
 
         function CheckDuplicate() {
@@ -362,7 +370,9 @@
             console.log("in reset");
             $("#categoryname").val("");
             $("#description").val("");
+            $("#hiddenImgPath").val("");
             $('#ProductImage').attr('src', '/images/DefaultProduct.jpg');
+            $("#upload").val("");
             var ele = $("#StatusInActive").closest('div');
             console.log("ele", ele);
             var rEle = $("#StatusActive").closest('div');
@@ -382,7 +392,7 @@
             var fileName = fi.value;
             var _URL = window.URL || window.webkitURL;
             var file = fi.files[0];
-           
+
 
             if (this.files && this.files[0]) {
                 var reader = new FileReader();
@@ -396,19 +406,20 @@
                 SizeOfImage = this.files[0].size;
             }
 
-          
+
             img = new Image();
             img.src = _URL.createObjectURL(file)
             img.onload = function () {
                 debugger;
                 if (img.width === 400 && img.height === 400) {
 
-                   
+
                 }
                 else {
                     alert("Product Image should not exceed 400x400");
-                   
+
                     $('#ProductImage').attr('src', '/images/DefaultProduct.jpg');
+                    $('#upload').val("");
 
                     //reset();
                     //$('#ProductImage').attr("");
@@ -421,7 +432,7 @@
 
         });
 
-      
+
     });
 
     function GetFileSize() {
@@ -448,9 +459,8 @@
         }
     }
 
-    
-</script>
 
+</script>
 
 <div class="row">
     <div class="page-title">
@@ -460,11 +470,11 @@
         <div class="title_right">
             <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
                 @*<div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for...">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button">Go!</button>
-                    </span>
-                </div>*@
+                        <input type="text" class="form-control" placeholder="Search for...">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">Go!</button>
+                        </span>
+                    </div>*@
             </div>
         </div>
     </div>
@@ -478,34 +488,21 @@
                         <li>
                             <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                         </li>
-                        @*<li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                            <ul class="dropdown-menu" role="menu">
-                                <li>
-                                    <a href="#">Settings 1</a>
-                                </li>
-                                <li>
-                                    <a href="#">Settings 2</a>
-                                </li>
-                            </ul>
-                        </li>*@
-                        @*<li>
-                            <a class="close-link"><i class="fa fa-close"></i></a>
-                        </li>*@
                     </ul>
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
                     <br />
-                    <form id="categoryForm" method="post" name="categoryForm" onsubmit="false" data-parsley-validate class="validateForm form-horizontal form-label-left">
-                        @Html.HiddenFor(m => m.IsAdd, new {name = "isAdd", id = "isAdd"})
+                    <form id="categoryForm" method="post" name="categoryForm" enctype="multipart/form-data" onsubmit="false" data-parsley-validate class="validateForm form-horizontal form-label-left">
+                        @Html.HiddenFor(m => m.IsAdd, new { name = "isAdd", id = "isAdd" })
                         @Html.HiddenFor(m => m.CategoryId, new { name = "CategoryId", id = "CategoryId" })
+                        @Html.HiddenFor(m => m.ImgPath, new { id = "hiddenImgPath" })
                         <div class="form-group">
                             <label class="control-label col-md-3 col-sm-3 col-xs-12" for="category-name">
                                 Category Name <span class="required">*</span>
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
-                                @Html.TextBoxFor(m => m.CategoryName,new {name= "categoryname", id = "categoryname",maxlength= "20", @class="form-control col-md-7 col-xs-12", tabindex = "1" } )
+                                @Html.TextBoxFor(m => m.CategoryName, new { name = "categoryname", id = "categoryname", maxlength = "20", @class = "form-control col-md-7 col-xs-12", tabindex = "1" })
                                 @*<input type="text" id="categoryname" required="required" class="form-control col-md-7 col-xs-12">*@
                             </div>
                         </div>
@@ -514,55 +511,50 @@
                                 Description
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
-                                @Html.TextAreaFor(m=>m.Description, new { name = "description", id = "description", @class = "form-control col-md-7 col-xs-12", tabindex = "2" })
+                                @Html.TextAreaFor(m => m.Description, new { name = "description", id = "description", @class = "form-control col-md-7 col-xs-12", tabindex = "2" })
                                 @*<input type="text" id="description" name="description" class="form-control col-md-7 col-xs-12">*@
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label class="control-label col-md-3 col-sm-3 col-xs-12" for="last-name">
                                 Image
                             </label>
                             <div class="col-md-6 col-sm-6 col-xs-12">
                                 @*@Html.TextBoxFor(m => m.ImagePath, "", new { type = "file", id = "FileUpload", @accept = "image/*", @required = "required", onchange = "GetFileSize()" })*@
-                                <img src="@Model.ImagePath" name="ProductImage" id="ProductImage" class="form-control col-md-7 col-xs-12" style="height:158px;width:30%" />
-                               
+                                <img src="@(string.IsNullOrEmpty(Model.ImgPath) ? Url.Content("~/images/DefaultProduct.jpg") : Url.Content("~/CategoryImages/" + Model.ImgPath))" name="ProductImage" id="ProductImage" class="form-control col-md-7 col-xs-12" style="height:158px;width:30%" />
                             </div>
-                            
-                            <input type="file" id="upload" name="upload" style="visibility: hidden; width: 1px; height: 1px" />
+                            <input type="file" id="upload" name="upload" accept="image/*" style="visibility: hidden; width: 1px; height: 1px" />
                             <a href="" onclick="document.getElementById('upload').click();return false" id="UpdateImage" style="margin-left: 26%;">Update Image<span style="color:red">&nbsp;(Image Size Limit:400x400)</span></a>
                         </div>
-                       
                         <div class="form-group">
                             <label class="control-label col-md-3 col-sm-3 col-xs-12">Status</label>
                             <div class="col-md-6 col-sm-6 col-xs-12" style="margin-top: 0.9%;">
                                 <div id="gender">
                                     @Html.HiddenFor(m => m.IsActive, new { id = "hiddenIsActive" })
                                     <label>
-                                       @Html.RadioButtonFor(m => m.IsActive, true,new { name = "IsActive", id="StatusActive",@class="flat",@checked="checked", tabindex = "3" })&nbsp; Active &nbsp;
-                                         @*<input type="radio" name="status" value="male"> &nbsp; Male &nbsp;*@
+                                        @Html.RadioButtonFor(m => m.IsActive, true, new { name = "IsActive", id = "StatusActive", @class = "flat", @checked = "checked", tabindex = "3" })&nbsp; Active &nbsp;
+                                        @*<input type="radio" name="status" value="male"> &nbsp; Male &nbsp;*@
                                     </label>
                                     <label>
-                                        @Html.RadioButtonFor(m => m.IsActive, false, new { name = "IsActive", id= "StatusInActive", @class = "flat", tabindex = "4" })&nbsp; InActive &nbsp;
+                                        @Html.RadioButtonFor(m => m.IsActive, false, new { name = "IsActive", id = "StatusInActive", @class = "flat", tabindex = "4" })&nbsp; InActive &nbsp;
                                     </label>
                                 </div>
                             </div>
                         </div>
-                       
                         <div class="ln_solid"></div>
                         <div class="form-group">
                             <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
-                                @if (ViewBag.UserCanAccess == "Edit")
-                                {
-
                                 <button class="btn btn-primary" type="button" onclick="reset()">Cancel</button>
                                 <button class="btn btn-primary" type="button" onclick="reset()">Reset</button>
                                 <button type="button" id="AddButton" class="btn btn-success">Add</button>
-                                }
+                                @*@if (ViewBag.UserCanAccess == "Edit")
+                                    {
+
+
+                                    }*@
                             </div>
                         </div>
                         <div id="dialogMessage" title="Message">
-
                         </div>
                     </form>
                     <div class="col-lg-12">
@@ -571,9 +563,8 @@
                             <center><span style="display:none" id="noRecord">No Records Found</span></center>
                         </div>
                     </div>
-                    </div>
+                </div>
             </div>
         </div>
     </div>
-
 </div>

@@ -37,3 +37,22 @@ F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryMana
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.csprojResolveAssemblyReference.cache
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.dll
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.pdb
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\csc.exe
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\Microsoft.CodeAnalysis.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\Microsoft.CSharp.Core.targets
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\Microsoft.VisualBasic.Core.targets
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\System.Collections.Immutable.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\System.Reflection.Metadata.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\vbc.exe
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\VBCSCompiler.exe
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\roslyn\VBCSCompiler.exe.config
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\InventoryManagement.Entity.dll.config
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\InventoryManagement.Entity.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\InventoryManagement.Entity.pdb
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.pdb

@@ -101,10 +101,18 @@ namespace InventoryManagement.API.Controllers
 
                         }
                     }
-                    catch (Exception ex)
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
                     {
-
+                        var errors = ex.EntityValidationErrors
+                            .SelectMany(e => e.ValidationErrors)
+                            .Select(v => v.PropertyName + ": " + v.ErrorMessage);
+                        objResponse.ResponseStatus = "FAILED";
+                        objResponse.ResponseMessage = string.Join(" | ", errors);
                     }
+                    //catch (Exception ex)
+                    //{
+
+                    //}
                 }
             }
             catch (Exception ex)

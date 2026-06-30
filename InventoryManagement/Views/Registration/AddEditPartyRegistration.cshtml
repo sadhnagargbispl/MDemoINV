@@ -23,7 +23,7 @@
     $(document).ready(function () {
 
         $(".preloader").hide();
-        $("#MobileNo").val('');
+        //$("#MobileNo").val('');
         $("#CityName").focus();
         $("#hiddenCityCode").val(0);
         ActionType = '@IsActionName__';
@@ -221,34 +221,7 @@
             return false;
         });
     });
-    //function GetParentPartyList(GroupId) {
-
-    //    $.ajax({
-    //        url: '/Registration/GetParentPartyList',
-    //        dataType: 'JSON',
-    //        method: 'GET',
-    //        data: { 'GroupId': GroupId },
-    //        success: function (data) {
-    //            console.log("data:", data);
-    //            //response(data);
-    //            if (data.length > 0) {
-    //                $("#hiddenParentPartyCode").val(data[0].PartyCode);
-    //                $("#ParentPartyCode").empty();
-    //                for (var i = 0; i < data.length; i++) {
-    //                    $("#ParentPartyCode").append("<option value=" + data[i].PartyCode + ">" + data[i].PartyName + "</option>");
-    //                }
-    //                GetPartyCode();
-    //            }
-
-    //        },
-    //        error: function (error) {
-    //            console.log(error);
-    //        }
-    //    });
-    //}
-    /* ==========================
-     LOAD PARENT PARTY (FILTERED)
-  ========================== */
+    
     function GetParentPartyList(GroupId) {
 
         var StateCode = $("#hiddenStateCode").val();
@@ -338,7 +311,6 @@
             }
         });
     }
-
     function CheckDuplicateUserPartyCode() {
         var UserPartyCode = $("#UserPartyCode").val();
         var PartyCodeStr = $("#PartyCode").val();
@@ -351,6 +323,7 @@
                 data: { 'IsActionType': IsActionType, 'PartyCode': PartyCodeStr, 'UserPartycode': UserPartyCode },
                 success: function (objResult) {
                     console.log("data:", objResult);
+                    var mobile = objResult.MobileNo != null ? objResult.MobileNo : objResult.mobileNo;
                     //response(data);
                     if (objResult.length != 0) {
                         DuplicateUserPartyCode = true;
@@ -460,7 +433,6 @@
         }
 
     }
-
     function GetCustomerInfo(IdNo) {
         //if (IdNo != "" && IdNo != null) {
         //    IdNo = parseInt(IdNo);
@@ -481,13 +453,13 @@
 
                         $("#CityName").val(objResult.CityName);
                         $("#StateCode").val(objResult.StateCode);
-                        $("#MobileNo").val(objResult.MobileNo);
+                        //$("#MobileNo").val(objResult.MobileNo);
                     }
                 }
                 else {
                     $("#CityName").val('');
                     $("#StateCode").val('');
-                    $("#MobileNo").val('');
+                    //$("#MobileNo").val('');
 
                 }
             },
@@ -695,6 +667,7 @@
                                     <label class="col-lg-3">Mobile No.<span style="color:red">*</span></label>
                                     <div class="col-lg-6">
 
+                      
                                         @Html.TextBoxFor(m => m.MobileNo, new { id = "MobileNo", tabindex = "0", name = "MobileNo", maxlength = "10", @required = "required", @class = "onlyNumeric form-control" })
                                     </div>
                                 </div>

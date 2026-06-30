@@ -134,6 +134,7 @@ namespace InventoryManagement.DataAccess
             ResponseDetail objResponse = objProductAPI.CheckBarcodeCode(batchcode ,prodid );
             return objResponse;
         }
+
         public ResponseDetail CheckDuplicateBatchCode(string batchcode, string prodid)
         {
             ResponseDetail objResponse = objProductAPI.CheckDuplicateBatchCode(batchcode, prodid); 

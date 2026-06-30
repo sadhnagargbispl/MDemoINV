@@ -33,19 +33,56 @@ namespace InventoryManagement.Controllers
 
         // POST: SaveCategoryMaster
         [HttpPost]
+        [ValidateInput(false)]
         public ActionResult SaveCategoryMaster(CategoryDetails model)
         {
             ResponseDetail objResponse = new ResponseDetail();
-            if (model != null)
+            try
             {
-                if (Session["LoginUser"] != null)
+                if (model.upload != null && !string.IsNullOrEmpty(model.upload.FileName)
+                    && !model.upload.FileName.Contains("DefaultProduct.jpg"))
                 {
-                    model.UserDetails = Session["LoginUser"] as User;
+                    var path = Server.MapPath("~/CategoryImages");
+                    if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                    // 50-char column ke andar fit karne ke liye chhota unique filename.
+                    string ext = Path.GetExtension(model.upload.FileName);   // e.g. ".jpg"
+                    if (ext != null && ext.Length > 6) ext = ext.Substring(0, 6);  // safety
+                    string myfile = DateTime.Now.ToString("yyyyMMddHHmmssfff") + ext;  // e.g. 20260630190501123.jpg  (~21 chars)
+                    var productImage = Path.Combine(path, myfile);
+                    model.upload.SaveAs(productImage);
+                    model.ImgPath = myfile;
+                    //string myfile = Guid.NewGuid() + "-" + Path.GetFileName(model.upload.FileName);
+                    //model.upload.SaveAs(Path.Combine(path, myfile));
+                    //model.ImgPath = myfile;          // <-- null yahin theek hota hai
                 }
-                objResponse = objProductManager.AddCategoryDetails(model);
+                // nayi image nahi aayi -> hidden ImgPath jaisi hai waisi reh jaayegi
+
+                if (Session["LoginUser"] != null)
+                    model.UserDetails = Session["LoginUser"] as User;
+
+                objResponse = objProductManager.AddCategoryDetails(model);   // apne manager variable ka naam
+            }
+            catch (Exception ex)
+            {
+                objResponse.ResponseStatus = "FAILED";
+                objResponse.ResponseMessage = ex.ToString();
             }
             return Json(objResponse, JsonRequestBehavior.AllowGet);
         }
+        //[HttpPost]
+        //public ActionResult SaveCategoryMaster(CategoryDetails model)
+        //{
+        //    ResponseDetail objResponse = new ResponseDetail();
+        //    if (model != null)
+        //    {
+        //        if (Session["LoginUser"] != null)
+        //        {
+        //            model.UserDetails = Session["LoginUser"] as User;
+        //        }
+        //        objResponse = objProductManager.AddCategoryDetails(model);
+        //    }
+        //    return Json(objResponse, JsonRequestBehavior.AllowGet);
+        //}
 
         // GET: SubCategoryMaster
         [SessionExpire]
@@ -484,6 +521,8 @@ namespace InventoryManagement.Controllers
             return Json(objResponse, JsonRequestBehavior.AllowGet);
 
         }
+
+
         [HttpPost]
         public ActionResult CheckDuplicateBatchCode(string batchcode, string prodid)
         {
