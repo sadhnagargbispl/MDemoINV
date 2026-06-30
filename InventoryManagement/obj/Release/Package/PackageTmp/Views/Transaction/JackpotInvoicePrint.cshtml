@@ -1,0 +1,765 @@
+﻿
+@model InventoryManagement.Entity.Common.DistributorBillModel
+@{
+    ViewBag.Title = "InvoicePrint";
+    Layout = null;
+    string CVCaption = System.Configuration.ConfigurationManager.AppSettings["CVCaption"];
+    string BVCaption = System.Configuration.ConfigurationManager.AppSettings["BVCaption"];
+    string PVCaption = System.Configuration.ConfigurationManager.AppSettings["PVCaption"];
+    string RPCaption = System.Configuration.ConfigurationManager.AppSettings["RPCaption"];
+    int count = 1;
+    decimal? TotalQty = 0;
+    decimal totalMRP = 0;
+    decimal? totalBV = 0;
+    decimal? totalAmount = 0;
+    DateTime checkdtforfreeprod = new DateTime(2020, 02, 26);
+}
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui-1.10.4.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-1.12.4.min.js"></script>
+<script src="~/Scripts/jquery-1.12.4.js"></script>
+<style>
+    body {
+        font-family: Verdana;
+    }
+
+    th {
+        font-size: 12px;
+    }
+
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+
+    .spanAddress {
+        width: 70%;
+        display: inline-block;
+        word-wrap: break-word;
+    }
+
+    .addPadding {
+        padding-left: 0.5% !important;
+        padding-right: 0.5% !important;
+    }
+
+    .addAllPadding {
+        padding-left: 0.5% !important;
+        padding-right: 0.5% !important;
+        padding-top: 0.5% !important;
+        padding-bottom: 0.5% !important;
+    }
+
+    .addLeftPadding {
+        padding-left: 0.5% !important;
+    }
+
+    .addRightPadding {
+        padding-right: 0.5% !important;
+    }
+
+    .fontStyle {
+        font-family: Verdana !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+    }
+
+    .removeborder {
+        border-left: none !important;
+        border-bottom: none !important;
+        border-right: none !important;
+    }
+
+    .removeexceptleft {
+        border-bottom: none !important;
+        border-right: none !important;
+        border-top: none !important;
+    }
+
+    .removeallborder {
+        border-style: none !important;
+        border-color: inherit !important;
+        border-width: medium !important;
+        margin-left: 120px !important;
+    }
+
+    .rightBorderOnly {
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    .fontHeader {
+        font-family: Verdana !important;
+        font-size: 14px !important;
+        text-align: center !important;
+    }
+
+    .Grid {
+        height: 500px;
+        overflow-y: scroll;
+    }
+
+    .gridalign {
+        text-align: center;
+    }
+
+    .gridleftalign {
+        text-align: left;
+    }
+</style>
+<script type="text/javascript">
+
+    function printPageElement() {
+        var url = window.location.href;
+
+        var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+        console.log("mywindow", mywindow);
+        var PrintHtml = $("#DivToPrint").html();
+
+        mywindow.document.write(PrintHtml);
+
+
+        mywindow.document.close(); // necessary for IE >= 10
+        mywindow.focus(); // necessary for IE >= 10*/
+
+        mywindow.print();
+        mywindow.close();
+
+        return true;
+    }
+    $(document).ready(function () {
+        $(".preloader").hide();
+    });
+</script>
+<div id="DivToPrint" class="fontStyle">
+    <div>
+        <button id="PrintPage" style="margin-left: 2%;" onclick="printPageElement()">Print</button>
+        <br />
+    </div>
+    <div>&nbsp;</div>
+    <table border="1" align="center" cellspacing="0" id="InvoicePrint">
+        <tbody>
+            <tr align="center">
+
+                <td colspan="5" class="removeborder">
+                    <table border="0" style="width:100%">
+                        <tbody>
+
+                            <tr align="left" class="fontHeader ">
+                                <td rowspan="3" width="20%"><img src="~/images/sp.png" style="height:135px;"/></td>
+                                <td width="70%">
+                                    @if (Model.IsGSTRegistered == "Y")
+                                    {
+                                        <b> GST Invoice</b>
+                                    }
+                                    else
+                                    {
+                                        <b> Invoice</b>
+                                    }
+                                    <br />
+                                    <span id="lblOfficeName" align="Center" style="display:inline-block;height:30px;font-size:20px;">
+                                        <b>
+                                            @if (!string.IsNullOrEmpty(Model.SoldByName))
+                                            {@Model.SoldByName }
+                                        </b>
+                                    </span>
+                                </td>
+                                <td rowspan="3" width="10%"></td>
+                            </tr>
+                            <tr align="left" class="fontHeader ">
+                                <td>
+                                    <span id="lblAddressTop" align="Center" style="display:inline-block;height:32px;">
+                                        @if (!string.IsNullOrEmpty(Model.SoldByAddress))
+                                        {@Model.SoldByAddress}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr class="fontHeader">
+
+                                @if (Model.IsGSTRegistered == "Y")
+                                {
+                                    <td class="addLeftPadding">
+                                        <br />
+                                        @if (!string.IsNullOrEmpty(Model.GSTNo))
+                                        {
+                                            <span id="lblTinNo" align="left">GSTIN:&nbsp;<span id="lblTinNotxt">@Model.GSTNo</span></span>
+                                        }
+                                        else
+                                        {
+                                            <span>&nbsp;</span>
+                                        }
+                                        <br /><br />
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="addLeftPadding"><span>&nbsp;</span></td>
+                                }
+
+
+                            </tr>
+                            @*<tr class="fontHeader">
+                                    <td class="removeborder addLeftPadding">
+                                        <br />
+                                        @if (!string.IsNullOrEmpty(Model.MobileNo))
+                                        {
+                                            <span id="lblTinNo" align="left">Mobile No:&nbsp;<span id="lblTinNotxt">@Model.MobileNo</span></span>
+                                        }
+                                        else
+                                        {
+                                            <span>&nbsp;</span>
+                                        }
+                                       <br /><br />
+                                    </td>
+                                    <td class="removeborder">GST INVOICE</td>
+
+                                </tr>*@
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="1" colspan="2" class="removeborder addPadding" style="width:50%">
+                    <table class="removeborder" width="100%">
+                        <tr>
+                            <td width="50px"><span id="lblInvoiceNo" text-align="right">Invoice No.:</span></td>
+                            <td>
+                                <span id="lblInvoiceNoTxt" text-align="right">
+                                    @if (!string.IsNullOrEmpty(Model.BillNo))
+                                    {@Model.BillNo}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span id="lblInvoiceDate" text-align="right">Invoice Date:</span></td>
+                            <td>
+                                <span id="lblInvoiceDateText" text-align="right">
+                                    @if (Model.BillDate != null)
+                                    {@Model.BillDate.ToString("dd-MMM-yyyy")}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span id="lblInvoiceDate" text-align="right">Invoice Type:</span></td>
+                            <td>
+                                @if (Model.BillType == "J")
+                                {
+                                    <span id="lblInvoiceDateText" text-align="right">
+                                        SJP Customer Invoice
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span id="lblInvoiceDateText" text-align="right">
+                                        SJP Scratch Card Invoice
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="3" class="rightBorderOnly addLeftPadding">
+                    <br />
+                    <table class="removeborder" width="100%">
+
+                        <tr>
+                            <td>
+                                <span id="lbldistributerId" align="left">
+                                    SJP Customer ID
+                                    :
+                                </span>
+                            </td>
+                            <td>
+                                <span id="lblDistIdtxt" align="left">
+                                    @if (!string.IsNullOrEmpty(Model.objCustomer.IdNo))
+                                    {@Model.objCustomer.IdNo}
+
+
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span id="lblMoblNo" text-align="right">Mobile No.:</span></td>
+                            <td>
+                                <span id="lblMoblNoText" text-align="right">
+                                    @Model.objCustomer.MobileNo
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                    <br />
+                </td>
+
+            </tr>
+
+            <tr>
+                <td rowspan="1" colspan="2" class="removeborder addPadding" style="width:50%">
+                    <i><b>Billed To,</b></i>  <br /><br />
+                    <table class="removeborder" width="100%">
+                        <tr>
+                            <td style="vertical-align:text-top;width:50%"><span id="lblDistributerName" align="left">SJP Customer Name:</span></td>
+                            <td>
+                                <span id="lblDistNametxt" align="left">
+                                    @if (!string.IsNullOrEmpty(Model.objCustomer.Name))
+                                    {@Model.objCustomer.Name}
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            @if (Model.IsGSTRegistered == "Y")
+                            {
+                                <td width="50%"><span id="lbldistGSTId" align="left">GSTIN/Unregistered:</span></td>
+                                <td>
+                                    <span id="lblDistGSTtxt" align="left">
+                                        @Model.objCustomer.GSTNo
+                                    </span>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>&nbsp;</td>
+                            }
+                        </tr>
+                    </table>
+
+
+                </td>
+                <td colspan="3" class="rightBorderOnly addLeftPadding">
+                    <i><b>Shipped To,</b></i><br /><br />
+                    <table class="removeborder" width="100%">
+                        <tr>
+                            <td style="vertical-align:text-top;width:50%"><span id="lblPartyName" align="left">SJP Customer Name:</span></td>
+                            <td>
+                                <span id="lblPartyNametxt" align="left">
+                                    @if (!string.IsNullOrEmpty(Model.objCustomer.Name))
+                                    {@Model.objCustomer.Name}
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            @if (Model.IsGSTRegistered == "Y")
+                            {
+                                <td><span id="lblpartyGSTId" align="left">GSTIN/unregistered:</span></td>
+                                <td>
+                                    <span id="lblPartytxt" align="left">
+                                        @Model.objCustomer.GSTNo
+                                    </span>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>&nbsp;</td>
+                            }
+                        </tr>
+                    </table>
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="5" class="addAllPadding">
+                    <div>
+                        <table class="Grid" cellspacing="0" cellpadding="3" align="Center" rules="all" border="1" id="GridView1" style="height:100px;width:100%;border-collapse:collapse;">
+                            <tbody>
+                                <tr>
+                                    <th scope="col" align="center" class="addPadding">S.No.</th>
+                                    <th scope="col" align="center" class="addPadding">Item Code</th>
+                                    @if (Model.IsGSTRegistered == "Y")
+                                    {
+                                        <th scope="col" align="center" class="addPadding">HSN Code</th>
+                                    }
+                                    <th scope="col" align="center" class="addPadding">Description Of Goods</th>
+                                    <th scope="col" align="center" class="addPadding">Pack Size</th>
+                                    <th scope="col" align="center" class="addPadding">Batch</th>
+
+                                    <th scope="col" align="center" class="addPadding">MRP</th>
+                                    <th scope="col" align="center" class="addPadding">Rate</th>
+
+
+                                    <th scope="col" align="center" class="addPadding">Qty</th>
+
+                                    <th scope="col" align="center" class="addPadding">Amount</th>
+                                </tr>
+                                @foreach (var obj in Model.objListProduct)
+                                {
+                                    totalMRP += obj.MRP??0;
+                                    <tr style="font-size:small;">
+
+                                        <td>@count.</td>
+                                        <td class="gridleftalign addPadding">
+                                            <span id="GridView1_ctl02_LblProductId">
+                                                @obj.ProductCodeStr
+                                            </span>
+                                        </td>
+                                        @if (Model.IsGSTRegistered == "Y")
+                                        {
+                                            <td class="gridleftalign addPadding">
+                                                <span id="GridView1_ctl02_LblRate">
+                                                    @obj.HSNCode
+                                                </span>
+                                            </td>
+                                        }
+                                        <td class="gridleftalign addPadding">
+                                            <b>@obj.ProductName</b>
+                                        </td>
+                                        <td class="gridleftalign addPadding">
+                                            <span id="GridView1_ctl02_LblBarcode">
+                                                @obj.Size
+                                            </span>
+                                        </td>
+                                        <td class="gridleftalign addPadding">
+                                            <span id="GridView1_ctl02_LblBarcode">
+                                                @obj.Barcode
+                                            </span>
+                                        </td>
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblMRP">
+
+
+
+                                                @obj.MRP
+
+                                            </span>
+
+
+                                        </td>
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblMRP">
+
+                                                
+
+                                                @obj.DP
+
+                                            </span>
+
+
+                                        </td>
+
+
+
+
+
+
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblQty">
+                                                @if (obj.FreeQty != null)
+                                                {
+                                                    var s = obj.Quantity + obj.FreeQty;
+                                                    s = Math.Round((decimal)s, 0);
+                                                    @s
+                                                    TotalQty += s;
+                                                }
+                                                else
+                                                {
+
+                                                    var s = obj.Quantity;
+                                                    s = Math.Round((decimal)s, 0);
+                                                    @s
+                                                    TotalQty += s;
+                                                }
+
+                                            </span>
+                                        </td>
+
+
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblTotalAmount">
+                                                @if (Model.BillType == "G" || Model.BillType == "C")
+                                                {
+                                                    var Amt = obj.MRP * obj.Quantity;
+                                                    Amt = Math.Round((decimal)Amt, 2);
+                                                    @Amt
+                                                    totalAmount += Amt;
+
+                                                }
+                                                else
+                                                {
+                                                    var Amt = obj.DP * obj.Quantity; //obj.Amount + obj.TaxAmt + obj.SGSTAmount + obj.CGSTAmount;
+                                                    Amt = Math.Round((decimal)Amt, 2);
+                                                    @Amt
+                                                    totalAmount += Amt;
+                                                }
+                                            </span>
+                                        </td>
+                                    </tr>
+                                                        count = count + 1;
+
+                                                    }
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    @if (Model.IsGSTRegistered == "Y")
+                                    {
+                                        <td></td>}
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+
+                                    <td class="gridalign">@totalMRP</td>
+                                    <td></td>
+
+                                    <td style="text-align:center">
+                                        <b>
+                                            @{var t = Math.Round(TotalQty ?? 0, 0);
+                                                @t
+                                            }
+                                        </b>
+                                    </td>
+
+                                    <td class="gridalign addPadding">
+                                        <span id="GridView1_ctl02_LblBV">
+                                            <b>
+
+                                                @totalAmount
+                                                @*Model.objProduct.TotalNetPayable*@
+
+                                            </b>
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+
+            <tr class="removeallborder">
+                <td colspan="3" class="removeallborder addLeftPadding" valign="bottom" style="width:65%">
+                    <b>
+                        @if (Model.objListProduct[0].OrderType == "T")
+                        {
+
+                            @Model.objListProduct[0].Remarks
+                            <br /><br />}
+                    </b>
+                    @if (Model.IsGSTRegistered == "Y")
+                    {
+                        <span id="lblVatTax" style="text-decoration:underline; margin-bottom:5px;">Tax Summary</span>
+
+                        <span>  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span>
+
+                        <table border="1" cellspacing="0" style="font-size:12px;margin-top:4px;">
+                            <tbody>
+                                <tr>
+                                    <td>Taxable Amt.&nbsp;</td>
+                                    @*<td>Tax(%)&nbsp;</td>
+                                        <td>Tax Amt.&nbsp;</td>*@
+                                    @{
+                                        var CheckDate = new DateTime(2017, 7, 1);
+                                        if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                        {//means date is greater than 1 july 2017
+                                            if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                            {
+                                                <td>IGST Tax(%)&nbsp;</td>
+                                                <td>IGST Tax Amt.&nbsp;</td>
+                                            }
+                                            else
+                                            {
+                                                <td>CGST Tax(%)&nbsp;</td>
+                                                <td>CGST Tax Amt.&nbsp;</td>
+                                                <td>SGST Tax(%)&nbsp;</td>
+                                                <td>SGST Tax Amt.&nbsp;</td>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <td>Tax(%)&nbsp;</td>
+                                            <td>Tax Amt.&nbsp;</td>
+                                        }
+
+                                    }
+
+
+                                    <td>Total Amount</td>
+                                </tr>
+                                @foreach (var tax in Model.objTaxSummary)
+                                {
+                                    <tr>
+                                        <td>@tax.SumAmount&nbsp;</td>
+                                        @*<td>@Model.objProduct.TotalTaxPer &nbsp;</td>
+                                            <td>@Model.objProduct.TotalTaxAmount&nbsp;</td>*@
+                                        @{
+                                            CheckDate = new DateTime(2017, 8, 1);
+                                            if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                            {//means date is greater than 1 jult 2017
+                                                if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                {
+
+                                                    <td>@tax.SumTaxPer &nbsp;</td>
+                                                    <td>@tax.SumTaxAmt&nbsp;</td>
+
+                                                }
+                                                else
+                                                {
+                                                    <td>@tax.SumCGSTPer &nbsp;</td>
+                                                    <td>@tax.SumCGSTAmt&nbsp;</td>
+                                                    <td>@tax.SumSGSTPer &nbsp;</td>
+                                                    <td>@tax.SumSGSTAmt&nbsp;</td>
+
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td>@tax.SumTaxPer &nbsp;</td>
+                                                <td>@tax.SumTaxAmt&nbsp;</td>
+                                            }
+
+                                        }
+                                        <td>@tax.SumNetPayableAmount</td>
+                                    </tr>
+                                            }
+
+                            </tbody>
+                        </table>
+                                            }<br />
+
+
+
+                    <span id="lblVatTax" style="text-decoration:underline; margin-bottom:5px;">
+                        @if (Model.BillType == "J" && Model.NumberOfBill < 7)
+                        {
+                            <em>
+                                Thanks for Shopping.<b>@{ var leftbills = 7 - Model.NumberOfBill; } @leftbills months</b> Left for <b>FREE Jackpot Shopping worth Rs.999/-</b>
+                            </em>
+                        }
+                                    else if (Model.BillType == "X")
+                                    {
+                                        <em>
+
+                                            <b>Congratulations for Free Shopping worth Rs.@Model.objListProduct[0].VoucherAmt thru Shopping Jackpot Scratch Card.</b>
+                                        </em>
+                                    }
+                    </span>
+                    <br /><br />
+                  
+                </td>
+
+                <td colspan="2" class="removeallborder addRightPadding" style="text-align :right;vertical-align:top ">
+                    @if (Model.BillType == "X")
+                    {
+
+                        <span id="lblNetPayable" text-align="Right">Total Amount :</span>
+                        <span id="lblNetPayabletxt" text-align="Right">@Model.objProduct.TotalNetPayable</span>
+
+                        <br />
+                        <div style="width:100%;border-bottom:1px solid #000000; height:5px;margin-bottom:2px;"></div>
+
+                        <b>
+                            <span id="lblRoundOff" text-align="Right">SJP Scratch Card No. :</span>
+                            <span id="lblRoundOfftxt" text-align="Right">@Model.objListProduct[0].VoucherNo</span>
+
+                            <span id="lblRoundOff" text-align="Right"> Value:</span>
+                            <span id="lblRoundOfftxt" text-align="Right">@Model.objListProduct[0].VoucherAmt</span>
+                        </b>
+                            <br />
+                            <span id="lblNetPayable" text-align="Right">Net Payable :</span>
+                            <span id="lblNetPayabletxt" text-align="Right">
+                                @{
+                                    var disc = Math.Round(Convert.ToDouble(Model.objProduct.TotalNetPayable - Model.objListProduct[0].VDiscountAmt));
+                                }
+                                @disc.00
+                            </span>
+                        
+    <br />
+    @*if (Model.IsGSTRegistered == "Y")
+        {
+            <span id="lblNetPayable" text-align="Right">Add. Tax Amount :</span>
+        }
+        else
+        {
+            <span id="lblNetPayable" text-align="Right">Add Misc. FPV charges :</span>
+        }
+        <span id="lblNetPayabletxt" text-align="Right">@Model.objProduct.TotalTaxAmount</span>
+
+        <br />*@
+
+                                }
+                                else
+                                {
+                                    <b>
+                                        <span id="lblNetPayable" text-align="Right">Net Payable :</span>
+    <span id="lblNetPayabletxt" text-align="Right">@Model.objListProduct[0].TotalNetPayable</span></b>}
+
+
+</td>
+
+            </tr>
+
+            @if (Model.objProduct.TotalWeight != null && Model.objProduct.TotalWeight > 0)
+            {
+                var grossWeight = Model.objProduct.TotalWeight / 1000;
+                <tr>
+                    <td class="removeborder" colspan="4" style="font-size:12px;">
+                        <b>Gross Weight :@grossWeight Kgs (Approx) </b>
+                    </td>
+                </tr>
+            }
+
+
+            @if (!string.IsNullOrEmpty(Model.Username))
+            {
+                <tr>
+                    <td class="removeborder" colspan="4" style="font-size:12px;">
+                        <b>Billed By :@Model.Username </b>
+                    </td>
+                </tr>
+            }
+            <tr>
+
+                <td colspan="2" class="removeborder"></td>
+                <td colspan="2" class="removeborder" style="text-align :right ">
+
+                    <br />
+
+                </td>
+            </tr>
+            <tr>
+                <td class="removeallborder addLeftPadding" colspan="3" style="font-size:12px;">
+                    Terms and Condition :
+                    <br />
+                    E. & O. E.<br />
+                    1. Goods once sold will not be taken back after 30 days and if seal broken.
+                    <br />
+
+                    2. All disputes are subject to jurisdiction of @if (!string.IsNullOrEmpty(Model.CompCity))
+                    {@Model.CompCity } only.
+
+                    <br />
+
+                    <br />
+
+
+                    <br />
+                    Declaration :
+                    <br />
+
+                    1. We declare that this invoice show the actual price of the goods described
+                    and that all particulars are true and correct.
+
+                </td>
+                <td colspan="2" style="text-align :right;padding-right: 8px;" class="removeallborder">
+                    <span id="lblCNMI" align="right">
+                        For&nbsp;@if (!string.IsNullOrEmpty(Model.SoldByName))
+                        {@Model.SoldByName }
+                    </span><br /><br /><br /><br />
+                    <span id="lblAuthorisedSign" align="right">Authorised Signatory</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="removeallborder"></td>
+                <td colspan="4" class="removeallborder" align="right"></td>
+            </tr>
+            <tr>
+                <td colspan="5" class="removeallborder" align="center">
+                    @*<span id="lblRegdOffice" align="center" style="font-size:10px;">Regd Office : @if(!string.IsNullOrEmpty(Model.CompanyName)){@Model.CompanyName}, @if (!string.IsNullOrEmpty(Model.CompanyAdd)) { @Model.CompanyAdd}</span>*@
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+    <center><span id="lblRegdOffice" align="center" style="font-size:11px;">This is computer generated invoice, doesn't require signature.</span></center>
+</div>

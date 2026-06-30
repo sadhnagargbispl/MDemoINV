@@ -1,0 +1,1279 @@
+﻿@model InventoryManagement.Entity.Common.M_IncentiveStatement
+@{
+    Layout = null;
+    string hypstr = "—";
+    decimal toralDiffPVComm = 0;
+    decimal totalDiffBVComm = 0;
+    var AdminChargeper = 0;
+    if (Model.StatementPeriodId == 1)
+    {
+        AdminChargeper = 5;
+    }
+    else
+    {
+        AdminChargeper = 3;
+    }
+}
+
+<!DOCTYPE html>
+<!-- saved from url=(0055)file:///C:/Users/DELL/Downloads/income_statement_3.html -->
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franchise Incentive Statement — SDC-CF04</title>
+    <link href="./Franchise Incentive Statement — SDC-CF04_files/css2" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --blue: #1D6FE8;
+            --blue-dark: #0F3D8A;
+            --blue-light: #EEF5FF;
+            --blue-mid: #3D8EFF;
+            --green: #16A34A;
+            --green-l: #EDFAF3;
+            --orange: #D97706;
+            --orange-l: #FFF7ED;
+            --ink: #0D1B2A;
+            --ink2: #3A4D60;
+            --ink3: #7A92AA;
+            --line: #E4ECF4;
+            --white: #fff;
+            --bg: #FAFCFF;
+        }
+
+        body {
+            font-family: 'Nunito',sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+        }
+
+        /* ── HEADER ── */
+        .page-header {
+            background: linear-gradient(135deg,var(--blue-dark) 0%,var(--blue) 100%);
+            padding: 32px 5% 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .page-header::after {
+                content: '';
+                position: absolute;
+                right: -60px;
+                bottom: -60px;
+                width: 240px;
+                height: 240px;
+                border-radius: 50%;
+                background: rgba(255,255,255,.05);
+                pointer-events: none;
+            }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(0,0,0,.15);
+        }
+
+        .header-title h1 {
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: clamp(1.1rem,2.5vw,1.55rem);
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .header-title p {
+            color: rgba(255,255,255,.65);
+            font-size: .82rem;
+            margin-top: 3px;
+        }
+
+        .header-badge {
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 10px;
+            padding: 10px 18px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+            .header-badge .badge-label {
+                color: rgba(255,255,255,.55);
+                font-size: .7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                display: block;
+                margin-bottom: 3px;
+            }
+
+            .header-badge .badge-val {
+                color: white;
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-size: 1rem;
+                font-weight: 800;
+            }
+
+        /* ── PERIOD BAR ── */
+        .period-bar {
+            background: white;
+            border-bottom: 1.5px solid var(--line);
+            padding: 14px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .period-text {
+            font-size: .82rem;
+            color: var(--ink3);
+            font-weight: 600;
+        }
+
+            .period-text strong {
+                color: var(--blue);
+                font-family: 'Plus Jakarta Sans',sans-serif;
+            }
+
+        .print-btn {
+            background: var(--blue-light);
+            color: var(--blue);
+            border: 1.5px solid rgba(29,111,232,.2);
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .print-btn:hover {
+                background: var(--blue);
+                color: white;
+            }
+
+        /* ── WRAPPER ── */
+        .wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 28px 5% 60px;
+        }
+
+        /* ── WELCOME CARD ── */
+        .welcome-card {
+            background: white;
+            border: 1.5px solid var(--line);
+            border-radius: 18px;
+            padding: 28px 28px 24px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .welcome-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg,var(--blue),var(--blue-mid));
+            }
+
+            .welcome-card h2 {
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-size: 1rem;
+                font-weight: 800;
+                color: var(--ink);
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .welcome-card p {
+                font-size: .875rem;
+                color: var(--ink2);
+                line-height: 1.75;
+            }
+
+        /* ── SUMMARY CARDS ── */
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sum-card {
+            background: white;
+            border: 1.5px solid var(--line);
+            border-radius: 16px;
+            padding: 22px 20px;
+            transition: .25s;
+        }
+
+            .sum-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(13,27,42,.08);
+            }
+
+            .sum-card.highlight {
+                background: linear-gradient(135deg,var(--blue),var(--blue-dark));
+                border: none;
+            }
+
+        .sum-label {
+            font-size: .72rem;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--ink3);
+            margin-bottom: 8px;
+        }
+
+        .sum-card.highlight .sum-label {
+            color: rgba(255,255,255,.6);
+        }
+
+        .sum-amount {
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: var(--blue);
+            line-height: 1;
+        }
+
+        .sum-card.highlight .sum-amount {
+            color: white;
+        }
+
+        .sum-sub {
+            font-size: .75rem;
+            color: var(--ink3);
+            margin-top: 5px;
+        }
+
+        .sum-card.highlight .sum-sub {
+            color: rgba(255,255,255,.55);
+        }
+
+        .sum-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* ── SECTION TITLE ── */
+        .sec-title {
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .82rem;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin: 28px 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .sec-title::after {
+                content: '';
+                flex: 1;
+                height: 1.5px;
+                background: var(--line);
+            }
+
+        /* ── SELF SALE TABLE ── */
+        .card {
+            background: white;
+            border: 1.5px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .card-head {
+            background: var(--bg);
+            border-bottom: 1.5px solid var(--line);
+            padding: 14px 20px;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .82rem;
+            font-weight: 800;
+            color: var(--ink2);
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead tr {
+            background: var(--bg);
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .72rem;
+            font-weight: 800;
+            color: var(--ink3);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid var(--line);
+            white-space: nowrap;
+        }
+
+            th:not(:first-child) {
+                text-align: right;
+            }
+
+        td {
+            padding: 13px 16px;
+            font-size: .875rem;
+            color: var(--ink2);
+            border-bottom: 1px solid var(--line);
+        }
+
+            td:not(:first-child) {
+                text-align: right;
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-weight: 600;
+            }
+
+            td:first-child {
+                font-weight: 600;
+                color: var(--ink);
+            }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #F7FAFF;
+        }
+
+        .total-row td {
+            background: var(--blue-light) !important;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-weight: 800 !important;
+            color: var(--blue) !important;
+            font-size: .9rem;
+        }
+
+        .grand-row td {
+            background: var(--blue) !important;
+            color: white !important;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-weight: 800 !important;
+            font-size: .95rem;
+        }
+
+        /* ── FRANCHISE TABLE ── */
+        .tag-id {
+            display: inline-block;
+            background: var(--blue-light);
+            color: var(--blue);
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .68rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: .04em;
+            margin-bottom: 3px;
+        }
+
+        .name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .franchise-name {
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .slab-pill {
+            display: inline-block;
+            font-size: .68rem;
+            font-weight: 700;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .slab-6 {
+            background: #EEF5FF;
+            color: var(--blue);
+        }
+
+        .slab-4 {
+            background: #FFF7ED;
+            color: var(--orange);
+        }
+
+        .slab-5 {
+            background: #EDFAF3;
+            color: var(--green);
+        }
+
+        /* TOTALS SECTION */
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .total-card {
+            background: white;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 20px 18px;
+        }
+
+            .total-card h4 {
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-size: .72rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: var(--ink3);
+                margin-bottom: 8px;
+            }
+
+            .total-card .val {
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-size: 1.35rem;
+                font-weight: 800;
+                color: var(--ink);
+            }
+
+            .total-card.blue-card {
+                background: var(--blue);
+                border: none;
+            }
+
+                .total-card.blue-card h4 {
+                    color: rgba(255,255,255,.6);
+                }
+
+                .total-card.blue-card .val {
+                    color: white;
+                }
+
+            .total-card.green-card {
+                background: var(--green);
+                border: none;
+            }
+
+                .total-card.green-card h4 {
+                    color: rgba(255,255,255,.6);
+                }
+
+                .total-card.green-card .val {
+                    color: white;
+                }
+
+        /* DEDUCTION BOX */
+        .deduction-box {
+            background: var(--orange-l);
+            border: 1.5px solid rgba(217,119,6,.2);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+            .deduction-box h4 {
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-size: .82rem;
+                font-weight: 800;
+                color: var(--orange);
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+
+            .deduction-box p {
+                font-size: .84rem;
+                color: #92400E;
+                line-height: 1.7;
+            }
+
+        /* FINAL CHEQUE */
+        .cheque-card {
+            background: linear-gradient(135deg,var(--green) 0%,#14532D 100%);
+            border-radius: 18px;
+            padding: 28px;
+            text-align: center;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .cheque-card::before {
+                content: '';
+                position: absolute;
+                right: -50px;
+                top: -50px;
+                width: 200px;
+                height: 200px;
+                border-radius: 50%;
+                background: rgba(255,255,255,.06);
+            }
+
+            .cheque-card .clabel {
+                color: rgba(255,255,255,.65);
+                font-size: .78rem;
+                font-weight: 700;
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                letter-spacing: .1em;
+                text-transform: uppercase;
+                margin-bottom: 6px;
+            }
+
+            .cheque-card .cval {
+                font-family: 'Plus Jakarta Sans',sans-serif;
+                font-size: 2.6rem;
+                font-weight: 800;
+                color: white;
+                line-height: 1;
+            }
+
+            .cheque-card .csub {
+                color: rgba(255,255,255,.6);
+                font-size: .82rem;
+                margin-top: 8px;
+            }
+
+        /* FOOTER */
+        .page-footer {
+            text-align: center;
+            padding: 20px 5%;
+            border-top: 1.5px solid var(--line);
+            background: white;
+            font-size: .78rem;
+            color: var(--ink3);
+        }
+
+            .page-footer strong {
+                color: var(--blue);
+                font-family: 'Plus Jakarta Sans',sans-serif;
+            }
+
+        /* ─── MOBILE CARDS (replaces franchise table on small screens) ─── */
+        .mobile-franchise {
+            display: none;
+        }
+
+        .mfc {
+            background: white;
+            border: 1.5px solid var(--line);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .mfc-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .mfc-name {
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .88rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .mfc-id {
+            font-size: .68rem;
+            font-weight: 700;
+            background: var(--blue-light);
+            color: var(--blue);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'Plus Jakarta Sans',sans-serif;
+        }
+
+        .mfc-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .mfc-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+            .mfc-row:last-child {
+                border-bottom: none;
+            }
+
+        .mfc-row-label {
+            font-size: .78rem;
+            color: var(--ink3);
+            font-weight: 600;
+        }
+
+        .mfc-row-val {
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+            .mfc-row-val.blue {
+                color: var(--blue);
+            }
+
+            .mfc-row-val.green {
+                color: var(--green);
+            }
+
+        /* RESPONSIVE */
+        @@media(max-width:640px) {
+            .summary-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+                .summary-row .sum-card:last-child {
+                    grid-column: 1/3;
+                }
+
+            .totals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .desktop-franchise {
+                display: none;
+            }
+
+            .mobile-franchise {
+                display: block;
+            }
+
+            .header-badge {
+                display: none;
+            }
+
+            .page-header {
+                padding: 22px 5% 20px;
+            }
+
+            .wrapper {
+                padding: 18px 4% 50px;
+            }
+
+            .cheque-card .cval {
+                font-size: 2rem;
+            }
+        }
+
+        @@media(max-width:400px) {
+            .summary-row {
+                grid-template-columns: 1fr;
+            }
+
+                .summary-row .sum-card:last-child {
+                    grid-column: auto;
+                }
+        }
+
+        /* ── COMPANY ADDRESS BAR ── */
+        .franchise-table-wrap {
+            overflow-x: auto;
+        }
+
+        .franchise-tbl {
+            width: 100%;
+            table-layout: auto;
+        }
+
+        .company-bar {
+            background: white;
+            border-bottom: 2px solid var(--blue);
+            padding: 14px 5%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .company-name {
+            font-family: 'Plus Jakarta Sans',sans-serif;
+            font-size: .95rem;
+            font-weight: 800;
+            color: var(--blue-dark);
+            margin-bottom: 4px;
+            letter-spacing: .01em;
+        }
+
+        .company-address {
+            font-size: .75rem;
+            color: var(--ink2);
+            line-height: 1.65;
+            max-width: 560px;
+        }
+
+        .company-right {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .company-contact {
+            font-size: .75rem;
+            color: var(--ink2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+            .company-contact a {
+                color: var(--blue);
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+        /* ── A4 PRINT ── */
+        @@media print {
+            @@page {
+                size: A4 portrait;
+                margin: 10mm 10mm 10mm 10mm;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            html, body {
+                width: 210mm;
+                background: white !important;
+            }
+
+            .print-btn {
+                display: none !important;
+            }
+
+            .period-bar {
+                padding: 6px 0;
+                border: none;
+            }
+
+            .page-header {
+                padding: 14px 0;
+                border-radius: 0;
+            }
+
+            .company-bar {
+                padding: 8px 0;
+                border-bottom: 1.5px solid var(--blue);
+            }
+
+            .wrapper {
+                max-width: 100%;
+                padding: 8px 0 0 0;
+            }
+
+            .welcome-card {
+                padding: 14px;
+                margin-bottom: 12px;
+                border-radius: 8px;
+            }
+
+                .welcome-card p {
+                    font-size: .72rem;
+                }
+
+            .summary-row {
+                gap: 8px;
+                margin-bottom: 12px;
+                grid-template-columns: repeat(3,1fr) !important;
+            }
+
+                .summary-row .sum-card:last-child {
+                    grid-column: auto !important;
+                }
+
+            .sum-card {
+                padding: 10px 12px;
+                border-radius: 8px;
+            }
+
+            .sum-amount {
+                font-size: 1.1rem;
+            }
+
+            .sec-title {
+                margin: 12px 0 8px;
+                font-size: .7rem;
+            }
+
+            .card {
+                margin-bottom: 12px;
+                border-radius: 8px;
+            }
+
+            .card-head {
+                padding: 8px 12px;
+                font-size: .7rem;
+            }
+
+            th {
+                padding: 7px 10px;
+                font-size: .65rem;
+            }
+
+            td {
+                padding: 7px 10px;
+                font-size: .72rem;
+            }
+
+            .totals-grid {
+                gap: 8px;
+                margin-bottom: 12px;
+                grid-template-columns: repeat(2,1fr) !important;
+            }
+
+            .total-card {
+                padding: 12px 14px;
+                border-radius: 8px;
+            }
+
+                .total-card .val {
+                    font-size: 1rem;
+                }
+
+            .deduction-box {
+                padding: 12px;
+                margin-bottom: 12px;
+                border-radius: 8px;
+            }
+
+                .deduction-box p {
+                    font-size: .72rem;
+                }
+
+            .cheque-card {
+                padding: 16px;
+                border-radius: 8px;
+                margin-bottom: 12px;
+            }
+
+                .cheque-card .cval {
+                    font-size: 1.7rem;
+                }
+
+            .mobile-franchise {
+                display: none !important;
+            }
+
+            .desktop-franchise {
+                display: block !important;
+            }
+
+            .page-footer {
+                padding: 8px 0;
+                font-size: .68rem;
+                background: white;
+            }
+
+            .card, .sum-card, .total-card, .cheque-card, .welcome-card {
+                box-shadow: none !important;
+            }
+            /* Franchise table — force fit A4 width */
+            .franchise-table-wrap {
+                overflow: visible !important;
+            }
+
+            .franchise-tbl {
+                width: 100% !important;
+                table-layout: fixed !important;
+                border-collapse: collapse;
+                font-size: .6rem !important;
+            }
+
+                .franchise-tbl th {
+                    padding: 5px 4px !important;
+                    font-size: .58rem !important;
+                    white-space: normal !important;
+                    word-break: break-word;
+                    line-height: 1.2;
+                }
+
+                .franchise-tbl td {
+                    padding: 5px 4px !important;
+                    font-size: .62rem !important;
+                    white-space: normal !important;
+                    word-break: break-word;
+                }
+
+            .tag-id {
+                font-size: .55rem !important;
+                padding: 1px 4px !important;
+            }
+
+            .slab-pill {
+                font-size: .55rem !important;
+                padding: 1px 4px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="header-logo">💼</div>
+            <div class="header-title">
+                <h1>Franchise Incentive Statement</h1>
+                <p>Eazyways Business Network</p>
+            </div>
+        </div>
+        <div class="header-badge">
+            <span class="badge-label">Franchisee Status</span>
+            <span class="badge-val">@Model.GroupCode-@Model.partycode</span>
+        </div>
+    </div>
+
+    <!-- PERIOD BAR -->
+    <div class="period-bar">
+        <span class="period-text">Statement Period: <strong>@Model.StatementPeriod</strong></span>
+        <button class="print-btn" onclick="window.print()">🖨️ Print Statement</button>
+    </div>
+
+    <!-- COMPANY ADDRESS BAR -->
+    <div class="company-bar">
+        <div class="company-left">
+            <div class="company-name">@Model.PartyName</div>
+            <div class="company-address">
+                @Model.Address
+                @*  E-130, 1st Floor, Sector-7, (Warehouse: E-40, Sec.: 7) Noida,<br>
+                    Dist: Gautam Budh Nagar, State: Uttar Pradesh, Pin Code: 201301 *@
+            </div>
+        </div>
+        <div class="company-right">
+            <div class="company-contact"><span>📞</span> <a href="tel:01120426612">0112 0426 6122</a></div>
+            <div class="company-contact"><span>✉️</span> <a href="mailto:zoewellnessindia@gmail.com">zoewellnessindia@gmail.com</a></div>
+            <div class="company-contact"><span>🌐</span> <a href="https://zoewellness.co.in/" target="_blank">zoewellness.co.in</a></div>
+        </div>
+    </div>
+
+    <!-- MAIN WRAPPER -->
+    <div class="wrapper">
+
+        <!-- WELCOME MESSAGE -->
+        <div class="welcome-card">
+            <h2>🎉 Congratulations!</h2>
+            <p>We feel pleasure to congratulate you on receiving your incentive cheque enclosed for the period from <strong>@Model.StatementPeriod</strong>, which comes out as a result of diligent efforts you and your team consultants have been putting in, for growing your Eazyways Business.</p>
+            <p style="margin-top:10px">Sincerity and dedication towards your business will take you a long way towards achievements and prosperity. We at Eazyways are always willing to give you a supporting hand to all your efforts on achieving your goals any time. <strong>We Wish You Success!</strong></p>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        @*         <div class="summary-row">
+                <div class="sum-card">
+                    <span class="sum-icon">🛒</span>
+                    <div class="sum-label">Product Sale</div>
+                    <div class="sum-amount">₹1,20,035</div>
+                    <div class="sum-sub">Slab: 10% &nbsp;|&nbsp; Total: ₹12,003.50</div>
+                </div>
+                <div class="sum-card">
+                    <span class="sum-icon">📊</span>
+                    <div class="sum-label">PV Sale</div>
+                    <div class="sum-amount">₹638.13</div>
+                    <div class="sum-sub">Slab: 9% &nbsp;|&nbsp; Total: ₹5,743.17</div>
+                </div>
+                <div class="sum-card highlight">
+                    <span class="sum-icon">💰</span>
+                    <div class="sum-label">Total Incentive by Self Sale (A)</div>
+                    <div class="sum-amount">₹17,746.67</div>
+                    <div class="sum-sub">Product Sale + PV Sale</div>
+                </div>
+            </div> *@
+
+        <!-- SELF SALE TABLE -->
+        <div class="sec-title">📋 Self Sale Breakdown</div>
+        <div class="card">
+            <div class="card-head">📦 Self Sale — Incentive Calculation</div>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Total Sale</th>
+                            <th>Self Slab</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Product Sale <span style="color:var(--ink3);font-size:.75rem;font-weight:500">(a)</span></td>
+                            <td>@Model.TotalBVVal</td>
+                            <td>@Model.bV_Slab</td>
+                            <td>@Model.self_Comm_BV</td>
+                        </tr>
+                        <tr>
+                            <td>PV Sale <span style="color:var(--ink3);font-size:.75rem;font-weight:500">(b)</span></td>
+                            <td>@Model.TotalPVVal</td>
+                            <td>@Model.pvSlab</td>
+                            <td>@Model.selfIncomePv</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3">TOTAL INCENTIVE BY SELF SALE (A) [a+b]</td>
+                            @*<td>@(Model.self_Comm_BV + (Model.selfIncomePv * Model.pvSlab))</td>*@
+                            <td>@(Model.self_Comm_BV + Model.selfIncomePv)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FRANCHISE NETWORK TABLE — Desktop -->
+        <div class="sec-title">🏪 Franchise Network Incentive (B &amp; C)</div>
+        <div class="card desktop-franchise">
+            <div class="card-head">👥 Downline Franchisee Performance</div>
+            <div class="franchise-table-wrap">
+                <table class="franchise-tbl">
+                    <thead>
+                        <tr>
+                            <th style="width:10%">ID No</th>
+                            <th style="width:22%">Franchisee Name</th>
+                            <th style="width:12%">Total BV Product (₹)</th>
+                            <th style="width:8%">BV Slab (%)</th>
+                            <th style="width:14%">Diff. BV Comm. (B) (₹)</th>
+                            <th style="width:12%">Total PV Sale (₹)</th>
+                            <th style="width:8%">PV Slab (%)</th>
+                            <th style="width:14%">Diff. PV Comm. (C) (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.DownlineFranchiseePerformance)
+                        {
+                            <tr>
+                                <td><span class="tag-id">@item.FromPartyCode</span></td>
+                                <td>@item.FranchiseeName</td>
+                                <td>@item.Diff_Comm_BV</td>
+                                <td>
+                                    @if (item.Diff_Comm_Pv == 6)
+                                    {
+                                        <span class="slab-pill slab-6">@item.Diff_Comm_Pv</span>
+                                    }
+                                    else if (item.Diff_Comm_Pv == 4)
+                                    {
+                                        <span class="slab-pill slab-4">@item.Diff_Comm_Pv</span>
+                                    }
+                                    else if (item.Diff_Comm_Pv == 5)
+                                    {
+                                        <span class="slab-pill slab-5">@item.Diff_Comm_Pv</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="slab-pill slab-6">@item.Diff_Comm_Pv</span>
+                                    }
+                                </td>
+                                <td>
+                                    @item.BvComm
+                                    @{
+                                        totalDiffBVComm = @totalDiffBVComm + @item.BvComm;
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Pv > 0)
+                                    {
+                                        @item.Pv
+                                    }
+                                    else
+                                    {
+                                        @hypstr
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Slab > 0)
+                                    {
+                                        @item.Slab
+                                    }
+                                    else
+                                    {
+                                        @hypstr
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.PvComm > 0)
+                                    {
+                                        @item.PvComm
+                                    }
+                                    else
+                                    {
+                                        @hypstr
+                                    }
+                                    @{
+                                        toralDiffPVComm = @toralDiffPVComm + @item.PvComm;
+                                    }
+                                </td>
+                            </tr>
+                                        }
+
+                        <tr class="total-row">
+                            <td colspan="4">TOTAL</td>
+                            <td>@totalDiffBVComm</td>
+                            <td colspan="2"></td>
+                            <td>@toralDiffPVComm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FRANCHISE NETWORK — Mobile Cards -->
+        <div class="mobile-franchise">
+            @foreach (var item in Model.DownlineFranchiseePerformance)
+            {
+                <div class="mfc">
+                    <div class="mfc-header">
+                        <div><div class="mfc-id">@item.FromPartyCode</div><div class="mfc-name">@item.FranchiseeName</div></div>
+                        @if (item.Diff_Comm_Pv == 6)
+                        {
+                            <span class="slab-pill slab-6">@item.Diff_Comm_Pv</span>
+                        }
+                        else if (item.Diff_Comm_Pv == 4)
+                        {
+                            <span class="slab-pill slab-4">@item.Diff_Comm_Pv</span>
+                        }
+                        else if (item.Diff_Comm_Pv == 5)
+                        {
+                            <span class="slab-pill slab-5">@item.Diff_Comm_Pv</span>
+                        }
+                        else
+                        {
+                            <span class="slab-pill slab-6">@item.Diff_Comm_Pv</span>
+                        }
+
+                    </div>
+                    <div class="mfc-rows">
+                        <div class="mfc-row"><span class="mfc-row-label">Total BV (Product)</span><span class="mfc-row-val">₹@item.Diff_Comm_BV</span></div>
+                        <div class="mfc-row"><span class="mfc-row-label">Diff. BV Commission (B)</span><span class="mfc-row-val blue">₹@item.BvComm</span></div>
+                        @if (item.Pv > 0)
+                        {
+                            <div class="mfc-row"><span class="mfc-row-label">Total PV Sale</span><span class="mfc-row-val">₹@item.Pv</span></div>
+                        }
+                        @if (item.PvComm > 0)
+                        {
+                            <div class="mfc-row"><span class="mfc-row-label">Diff. PV Commission (C)</span><span class="mfc-row-val green">₹@item.PvComm</span></div>
+                        }
+                    </div>
+                </div>
+            }
+            <!-- Mobile Total -->
+            <div class="mfc" style="background:var(--blue-light);border-color:rgba(29,111,232,.2)">
+                <div class="mfc-rows">
+                    <div class="mfc-row"><span class="mfc-row-label" style="color:var(--blue);font-weight:800">TOTAL — Diff. BV Commission (B)</span><span class="mfc-row-val blue">₹@totalDiffBVComm *</span></div>
+                    <div class="mfc-row"><span class="mfc-row-label" style="color:var(--green);font-weight:800">TOTAL — Diff. PV Commission (C)</span><span class="mfc-row-val green">₹@toralDiffPVComm</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INCENTIVE TOTALS -->
+        <div class="sec-title">💡 Incentive Summary</div>
+        <div class="totals-grid">
+            <div class="total-card">
+                <h4>Total Incentive by Self Sale (A)</h4>
+                <div class="val">₹@(Model.self_Comm_BV + Model.selfIncomePv)</div>
+            </div>
+            <div class="total-card blue-card">
+                <h4>Diff. BV Commission (B)</h4>
+                <div class="val">₹@totalDiffBVComm</div>
+            </div>
+            <div class="total-card green-card">
+                <h4>Diff. PV Commission (C)</h4>
+                <div class="val">₹@toralDiffPVComm</div>
+            </div>
+            <div class="total-card" style="background:var(--ink);border:none">
+                <h4 style="color:rgba(255,255,255,.55)">Total Incentive (A + B + C)</h4>
+                <div class="val" style="color:white">₹@(Model.Self_Comm_BV + Model.selfIncomePv + totalDiffBVComm + toralDiffPVComm)</div>
+            </div>
+        </div>
+
+        <!-- DEDUCTION NOTE -->
+        <div class="deduction-box">
+            <h4>⚠️ Please Note — Deductions Applied</h4>
+            <p>Deduction of <strong>@AdminChargeper%</strong> towards the Eazyways IBCW Welfare Society, to support orphan child program, IBC family support &amp; other society's welfare activities, and <strong>@AdminChargeper% admin deduction</strong> have been applied.</p>
+            <p style="margin-top:8px"><strong>Admin Charge: @AdminChargeper% = ₹@Model.AdminCharge</strong></p>
+        </div>
+
+        <!-- FINAL CHEQUE AMOUNT -->
+        <div class="cheque-card">
+            <div class="clabel">🎉 Your Incentive Cheque Amount</div>
+            <div class="cval">₹@Model.ChequeAmount</div>
+            <div class="csub">Period: @Model.StatementPeriod &nbsp;|&nbsp; Franchisee: @Model.GroupCode-@Model.partycode</div>
+        </div>
+
+        <!-- FINAL NOTE -->
+        <div style="background:white;border:1.5px solid var(--line);border-radius:14px;padding:18px 20px;font-size:.84rem;color:var(--ink3);line-height:1.7">
+            <strong style="color:var(--ink);font-family:&#39;Plus Jakarta Sans&#39;,sans-serif">Grand Total: ₹@Model.ChequeAmount</strong><br>
+            This statement is computer generated. For any queries, please contact your Eazyways support team directly.
+        </div>
+
+    </div><!-- /wrapper -->
+    <!-- FOOTER -->
+    <div class="page-footer">
+        Generated by <strong>Eazyways Business Network</strong> &nbsp;|&nbsp; Franchisee: @Model.GroupCode-@Model.partycode &nbsp;@* |&nbsp; Period: Feb 2026 *@
+    </div>
+
+
+
+</body>
+</html>

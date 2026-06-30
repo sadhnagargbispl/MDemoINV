@@ -1,0 +1,482 @@
+﻿
+
+@model InventoryManagement.Entity.Common.DistributorBillModel
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "Update Invoice";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string CurrentPartyCode = (Session["LoginUser"] as User).PartyCode;
+    string CurrentPartyName = (Session["LoginUser"] as User).PartyName;
+}
+
+
+<style>
+    .ui-widget-header {
+        margin-top: -1% !important;
+        width: 102% !important;
+        margin-left: -1% !important;
+    }
+
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+
+    .ui-dialog-titlebar-close {
+        margin-right: 1% !important;
+    }
+
+    .ui-widget-content {
+        background: white !important;
+        border-radius: 15px !important;
+        -webkit-border-radius: 4px !important;
+    }
+
+    ui-autocomplete-input {
+        z-index: 100;
+    }
+
+    .input-readonly {
+        background-color: #EBEBE4;
+    }
+</style>
+<script type="text/javascript">
+    var FromDate = "";
+    var formdata;
+
+    $(document).ready(function () {
+        $(".preloader").hide();
+        fillCouriers();
+
+        var reqBy = '@CurrentPartyCode';
+        $("#ReqBy").val(reqBy);
+
+        $("form[name=UpdateInvForm]").unbind("submit");
+        $("form[name=UpdateInvForm]").bind('submit', function (e) {
+            formdata = new FormData($("#UpdateInvForm")[0]);
+            SaveBill();
+        });
+        function fillCouriers() {
+            debugger;
+
+                $("#CourierNameSelect").show();
+                $.ajax({
+                    url: '/Transaction/CourierList',
+                    dataType: 'JSON',
+                    method: 'GET',
+                    success: function (objModel) {
+                        if (objModel != null) {
+                            $('#courierDetail').html();
+                            for (var i = 0; i <= objModel.length; i++) {
+                                if (objModel[i] != undefined && (objModel[i].ID != undefined && objModel[i].Name != undefined)) {
+                                    $('#courierDetail').append($("<option></option>")
+                                        .attr("value", objModel[i].ID)
+                                        .text(objModel[i].Name));
+                                }
+                            }
+                        }
+                    },
+                    error: function (error) {
+
+                    }
+                });
+
+      }
+
+        $("#BillNo").change(function () {
+            var billno = $("#BillNo").val();
+            if (billno != "")
+                GetBillData(billno);
+        });
+        $("#FreightType").change(function () {
+            if ( $("#FreightType").val() == 'C')
+                $("#CourierNameSelect").show();
+            else
+                $("#CourierNameSelect").hide();
+        })
+
+        $("#FreightAmt").change(function () {
+            var tAmt = $("#txtTAmt").val();
+            var FreightAmt = $("#FreightAmt").val();
+            var NPayable = parseFloat(tAmt) + parseFloat(FreightAmt);
+            $("#txtNetPayable").val(NPayable);
+        });
+        $('#courierDetail').change(function () {
+            var selectedvalue = $("#courierDetail").val();
+            var selectedCourier = $("#courierDetail option:selected").text();
+            $("#CourierName").val(selectedCourier);
+            $("#CourierId").val(selectedvalue);
+            var weight = $("#TotalWeight").val();
+            $.ajax({
+                url: '/Transaction/CourierDetailByweight',
+                dataType: 'JSON',
+                method: 'GET',
+                data: { "CourierId": selectedvalue, "Weight": weight },
+                success: function (data) {
+                    if (data != null) {
+                        //var totalAmount = parseFloat($("#TotalAmountNet").val());
+                        //var courierCharges = parseFloat(data.Amount);
+                        //var netpay = totalAmount + courierCharges;
+                        //$("#CourierCharges").val(courierCharges);
+                        //$("#NetPayable").val(netpay);
+                    }
+                },
+                error: function (error) {
+
+                }
+            });
+        });
+
+        $("#DispatchDateStr").datetimepicker({
+            format: 'DD-MMM-YYYY',
+            widgetPositioning: {
+                horizontal: 'auto',
+                vertical: 'bottom'
+            }
+        });
+
+    function GetBillData(userbillno)
+        {
+        ResetControls();
+        $.ajax({
+            url:'@Url.Action("GetBillData","Transaction")',
+            type: 'POST',
+            data: { "BillNo": userbillno },
+            dataType: "json",
+            success: function (objResult)
+            {
+                if (objResult != null) {
+                    $("#BillNo").val(userbillno);
+                    $("#FreightType").val(objResult.objListProduct[0].FreightType);
+                   // $("#FreightAmt").val(objResult.objListProduct[0].FreightAmt);
+                    if (objResult.objListProduct[0].FreightType == 'C')
+                        $("#CourierNameSelect").show();
+                    else
+                        $("#CourierNameSelect").hide();
+                    $("#courierDetail").val(objResult.objListProduct[0].CourierId);
+                    $("#TransporterName").val(objResult.objListProduct[0].TransporterName);
+                    $("#VehicleNo").val(objResult.objListProduct[0].VehicleNo);
+                    $("#Station").val(objResult.objListProduct[0].Station);
+                    $("#DocketNo").val(objResult.objListProduct[0].DocketNo);
+                    $("#EWayBillNo").val(objResult.objListProduct[0].EWayBillNo);
+                    $("#DispatchDateStr").val(objResult.DispatchDateStr);
+                    $("#DeliveryPlace").val(objResult.DelvAddress);
+                    $("#Remarks").val(objResult.objCustomer.Remarks);
+                    //$("#txtTAmt").val(parseFloat(objResult.objProduct.TotalNetPayable) - parseFloat(objResult.objListProduct[0].FreightAmt));
+                    //$("#txtNetPayable").val(objResult.objProduct.TotalNetPayable);
+                }
+
+            },
+            error: {}
+        });
+    }
+    });
+    function SaveBill() {
+        var ErrorFlag=false;
+        console.log("form data = > " + formdata);
+        if (ErrorFlag == false) {
+            $("#btnSave").attr("disabled", true);
+            $.ajax({
+                url: '@Url.Action("SaveBillDetail", "Transaction")',
+                type: 'POST',
+                data: formdata,
+                processData: false,
+                contentType: false,
+                async: false,
+                dataType: "json",
+                success: function (objResponse) {
+                    //$("#btnSave").attr("disabled", false);
+                    $("#btnSave").removeAttr("disabled");
+                    if (objResponse != null) {
+                        if (objResponse.ResponseStatus == "OK") {
+                            OpenDialog("dialogMessage", "Bill details updated successfully!.", "false");
+                            ResetControls();
+                        }
+                        else {
+                            OpenDialog("dialogMessage", "Please try later.", "false");
+                        }
+                    }
+                },
+                error: function (xhr) {
+                    //  return false;
+                    console.log(xhr);
+                    console.log("Save Error:" );
+                }
+            });
+        }
+        $("#btnSave").attr("disabled", false);
+    }
+
+    function ResetControls()
+    {
+        $("#BillNo").val('');
+        $("#FreightAmt").val('0');
+        $("#courierDetail").val('0');
+        $("#TransporterName").val('');
+        $("#VehicleNo").val('');
+        $("#Station").val('');
+        $("#EWayBillNo").val('');
+        $("#DispatchDateStr").val('');
+        $("#DeliveryPlace").val('');
+        $("#Remarks").val('');
+        $("#txtTAmt").val('0');
+        $("#txtNetPayable").val('0');
+
+    }
+
+    function OpenDialog(dialogId, Message, isConfirmation) {
+        $("#" + dialogId).empty();
+        $("#" + dialogId).append('<p>' + Message + '</p>');
+        if (isConfirmation == "true") {
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "Yes",
+                    id: "btnYes" + dialogId,
+                    click: function () {
+                        IsYes = true;
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                },
+                {
+                    text: "No",
+                    id: "btnNo" + dialogId,
+                    click: function () {
+                        IsYes = false;
+                        $("#" + dialogId).dialog("close");
+                    }
+                }
+                ]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+        else {
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "OK",
+                    id: "btn" + dialogId,
+                    click: function () {
+                        $("#" + dialogId).dialog("close");
+                    }
+                }]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+    }
+</script>
+
+<div class="row">
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Transaction</h3>
+        </div>
+        <div class="title_right">
+            <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Update Invoice</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br />
+                    <form id="UpdateInvForm" method="post" name="UpdateInvForm" onsubmit="return false" class="form-horizontal form-label-left">
+                        @Html.HiddenFor(m => m.objProduct.CourierId, new { id = "CourierId", name = "CourierId" })
+
+                        @Html.HiddenFor(m => m.objProduct.CourierName, new { id = "CourierName", name = "CourierName" })
+
+
+                        <div class="col-lg-12">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="control-label col-lg-4 col-md-4 col-sm-6 col-xs-12" for="category-name">
+                                        Bill No.
+                                    </label>
+                                    <div class="col-lg-8 col-md-8 col-sm-6 col-xs-12" style="padding-left: 0.5%;">
+                                        @Html.TextBoxFor(m => m.BillNo, new { id = "BillNo", @class = "form-control col-md-7 col-xs-12", @required = "required", name = "BillNo" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      <div class="row RowMargin" style="margin-top:1%">
+
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Dispatch Date
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.TextBoxFor(m => m.DispatchDateStr, new { name = "DispatchDateStr", id = "DispatchDateStr", tabindex = "6", @required = "required", @class = "form-control col-md-7 col-xs-12" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row RowMargin" style="margin-top:1%">
+
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Dispatch Mode
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.DropDownListFor(m => m.FreightType, new SelectList(new List<SelectListItem> { new SelectListItem { Text="H",Value="By Hand"},
+                                   new SelectListItem { Text="C",Value="By Courier"},
+                                   new SelectListItem { Text="S",Value="By Transport"}}, "Text", "Value"), new { @class = "form-control", @id = "FreightType" }
+                                       )
+                                    @*<input type="text" id="TotalRP"/>*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row RowMargin" style="margin-top:1%">
+                            <div class="col-lg-12">
+                                <label class="control-label col-lg-2" for="category-name">
+                                    Delivery Place
+                                </label>
+                                <div class="col-lg-10">
+                                    @Html.TextBoxFor(m => m.objProduct.DeliveryPlace, new { tabindex = "0", name = "DeliveryPlace", id = "DeliveryPlace", @class = "form-control", @style = "max-width: 100%!important;" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row RowMargin" style="margin-top:1%">
+                            <div class="col-lg-12">
+                                <label class="control-label col-lg-2" for="category-name">
+                                    Remarks
+                                </label>
+                                <div class="col-lg-10">
+                                    @Html.TextBoxFor(m => m.objCustomer.Remarks, new { tabindex = "0", name = "Remarks", id = "Remarks", @class = "form-control", @style = "max-width: 100%!important;" })
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row RowMargin" style="margin-top:1%">
+                            <div class="col-lg-6" id="CourierNameSelect" style="display:none;">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Select Courier
+                                </label>
+                                <div class="col-lg-8">
+                                    <select id="courierDetail" name="courierDetail" class="form-control"></select>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Transporter
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.TextBoxFor(m => m.TransporterName, new { name = "TransporterName", id = "TransporterName", @class = "form-control" })
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row RowMargin" style="margin-top:1%">
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Vehicle No.
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.TextBoxFor(m => m.VehicleNo, new { name = "VehicleNo", id = "VehicleNo", @class = "form-control" })
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Docket No
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.TextBoxFor(m => m.DocketNo, new { name = "DocketNo", id = "DocketNo", @class = "form-control" })
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    Station
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.TextBoxFor(m => m.Station, new { name = "Station", id = "Station", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-top:1%">
+                            <div class="col-lg-6">
+                                <label class="control-label col-lg-4" for="category-name">
+                                    EWay Bill No.
+                                </label>
+                                <div class="col-lg-8">
+                                    @Html.TextBoxFor(m => m.EWayBillNo, new { name = "EWayBillNo", id = "EWayBillNo", @class = "form-control" })
+                                </div>
+
+                            </div>
+                            @*<div class="col-lg-6">
+                                        <label class="control-label col-lg-4" for="category-name">
+                                            Courier Charges
+                                        </label>
+                                        <div class="col-lg-8">
+                                            @Html.TextBoxFor(m => m.FreightAmt, new { name = "FreightAmt", id = "FreightAmt", @class = "form-control" })
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:1%">
+                                    <div class="col-lg-6">
+                                        <label class="control-label col-lg-4" for="category-name">
+                                           Total Amount
+                                        </label>
+                                        <div class="col-lg-8">
+                                            <input type="text" id="txtTAmt" disabled="disabled" class = "form-control" />
+                                        </div>
+
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label class="control-label col-lg-4" for="category-name">
+                                            Net Payable
+                                        </label>
+                                        <div class="col-lg-8">
+                                            <input type="text" id="txtNetPayable" disabled="disabled" class = "form-control" />
+                                        </div>
+
+                                    </div>
+                                       <div class="row" style="margin-top:1%">*@
+
+                        <div class="row" style="margin-top:15px;">
+                            <div class="col-lg-2 col-lg-offset-1 text-left">
+
+                                @*<button class="btn btn-primary" type="reset" onclick="reset()">Reset</button>*@
+                                <button type="submit" id="BtnSaveFnl" class="btn btn-success" tabindex="0">Save</button>
+
+                            </div>
+                        </div>
+                            </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="dialogMessage" title="Message">
+
+    </div>
+
+</div>
+
+

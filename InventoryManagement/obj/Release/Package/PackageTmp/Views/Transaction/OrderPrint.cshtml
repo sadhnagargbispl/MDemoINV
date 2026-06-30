@@ -1,0 +1,381 @@
+﻿@model InventoryManagement.Entity.Common.PartyOrderModel
+@{
+    Layout = null;
+    string CVCaption = System.Configuration.ConfigurationManager.AppSettings["CVCaption"];
+    string BVCaption = System.Configuration.ConfigurationManager.AppSettings["BVCaption"];
+    string PVCaption = System.Configuration.ConfigurationManager.AppSettings["PVCaption"];
+    string RPCaption = System.Configuration.ConfigurationManager.AppSettings["RPCaption"];
+    string AdminPartyCode = System.Configuration.ConfigurationManager.AppSettings["WRPartyCode"];
+    int count = 1;
+    decimal? TotalQty = 0;
+    int totalMRP = 0;
+    decimal? totalBV = 0;
+    decimal? totalAmount = 0;
+    DateTime checkdtforfreeprod = new DateTime(2020, 02, 26);
+}
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui-1.10.4.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-1.12.4.min.js"></script>
+<script src="~/Scripts/jquery-1.12.4.js"></script>
+<style>
+    body {
+        font-family: Verdana;
+    }
+
+    th {
+        font-size: 12px;
+    }
+
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+
+    .spanAddress {
+        width: 70%;
+        display: inline-block;
+        word-wrap: break-word;
+    }
+
+    .addPadding {
+        padding-left: 0.5% !important;
+        padding-right: 0.5% !important;
+    }
+
+    .addAllPadding {
+        padding-left: 0.5% !important;
+        padding-right: 0.5% !important;
+        padding-top: 0.5% !important;
+        padding-bottom: 0.5% !important;
+    }
+
+    .addLeftPadding {
+        padding-left: 0.5% !important;
+    }
+
+    .addRightPadding {
+        padding-right: 0.5% !important;
+    }
+
+    .fontStyle {
+        font-family: Verdana !important;
+        font-size: 12px !important;
+        font-weight: bold !important;
+    }
+
+    .removeborder {
+        border-left: none !important;
+        border-bottom: none !important;
+        border-right: none !important;
+    }
+
+    .removeexceptleft {
+        border-bottom: none !important;
+        border-right: none !important;
+        border-top: none !important;
+    }
+
+    .removeallborder {
+        border-style: none !important;
+        border-color: inherit !important;
+        border-width: medium !important;
+        margin-left: 120px !important;
+    }
+
+    .rightBorderOnly {
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    .fontHeader {
+        font-family: Verdana !important;
+        font-size: 14px !important;
+        text-align: center !important;
+    }
+
+    .Grid {
+        height: 500px;
+        overflow-y: scroll;
+    }
+
+    .gridalign {
+        text-align: center;
+    }
+
+    .gridleftalign {
+        text-align: left;
+    }
+</style>
+<script type="text/javascript">
+
+    function printPageElement() {
+        debugger;
+        $("#PrintPage").hide();
+        var url = window.location.href;
+
+        var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+        console.log("mywindow", mywindow);
+        var PrintHtml = $("#DivToPrint").html();
+        mywindow.document.write(PrintHtml);
+        mywindow.document.close(); // necessary for IE >= 10
+        mywindow.focus(); // necessary for IE >= 10*/
+        mywindow.print();
+        //mywindow.close();
+        $("#PrintPage").show();
+        return true;
+    }
+    $(document).ready(function () {
+        $(".preloader").hide();
+    });
+</script>
+
+<div id="DivToPrint" class="fontStyle">
+    <div>
+        <button id="PrintPage" style="margin-left: 2%;" onclick="printPageElement()">Print</button>
+        <br />
+    </div>
+    <div>&nbsp;</div>
+    <table border="1" align="center" style="width:85%;" cellspacing="0" id="InvoicePrint">
+        <tbody>
+            <tr align="center">
+
+                <td colspan="5" class="removeborder">
+                    <table border="0" style="width:100%">
+                        <tbody>
+
+                            <tr align="left" class="fontHeader ">
+                                <td rowspan="3" width="20%"></td>
+                                <td width="70%">
+                                    <b> Order</b>
+                                    <br />
+                                    <span id="lblOfficeName" align="Center" style="display:inline-block;height:30px;font-size:20px;">
+                                        <b>
+                                            @Model.TopartyName 
+                                        </b>
+                                    </span>
+                                </td>
+                                <td rowspan="3" width="10%"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="1" colspan="2" class="removeborder addPadding" style="width:50%">
+                    <table class="removeborder" width="100%">
+                        <tr>
+                            <td><span id="lblInvoiceNo" text-align="right">Order No.:</span></td>
+                            <td>
+                                <span id="lblInvoiceNoTxt" text-align="right">
+                                    @if (!string.IsNullOrEmpty(Model.OrderNo))
+                                    {@Model.OrderNo}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span id="lblInvoiceDate" text-align="right">Order Date:</span></td>
+                            <td>
+                                <span id="lblInvoiceDateText" text-align="right">
+                                    @if (Model.OrderDate != null)
+                                    {@Model.OrderDate.ToString("dd-MMM-yyyy")}
+                                </span>
+                            </td>
+                        </tr>
+                       
+                    </table>
+
+                </td>
+                <td colspan="3" class="rightBorderOnly addLeftPadding">
+                    <br />
+                    <table class="removeborder" width="100%">
+                        <tr>
+                            <td><span id="lblMoblNo" text-align="right">Party Name :</span></td>
+                            <td>
+                                <span id="lblMoblNoText" text-align="right">
+                                    @Model.PartyName
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span id="lblMoblNo" text-align="right">Mobile No.:</span></td>
+                            <td>
+                                <span id="lblMoblNoText" text-align="right">
+                                    @Model.Mobileno
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span id="lblMoblNo" text-align="right">Address :</span></td>
+                            <td>
+                                <span id="lblMoblNoText" text-align="right">
+                                    @Model.Address
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
+                    <br />
+                </td>
+
+            </tr>
+
+            <tr style="">
+                <td rowspan="1" colspan="2" class="removeborder addPadding" style="width:50%">
+                    <i><b>Order By,</b></i>  <br /><br />
+                    <table class="removeborder" width="100%">
+                        <tr>
+                          
+                            <td>
+                                <span id="lblDistNametxt" align="left">
+                                    @Model.PartyCode
+                                </span>
+                            </td>
+                        </tr>
+                      
+                        
+                    </table>
+
+
+                </td>
+                <td colspan="3" class="rightBorderOnly addLeftPadding">
+                    <i><b>Order To,</b></i><br /><br />
+                    <table class="removeborder" width="100%">
+                        <tr>
+                           
+                            <td>
+                                <span id="lblPartyNametxt" align="left">
+                                   @Model.OrderTo
+                                </span>
+                            </td>
+                        </tr>
+                       
+                      
+                    </table>
+                </td>
+
+            </tr>
+
+            <tr>
+                <td colspan="5" class="addAllPadding">
+                    <div>
+                        <table class="Grid" cellspacing="0" cellpadding="3" align="Center" rules="all" border="1" id="GridView1" style="height:100px;width:100%;border-collapse:collapse;">
+                            <tbody>
+                                <tr>
+                                    <th scope="col" align="center" class="addPadding">S.No.</th>
+                                    <th scope="col" align="center" class="addPadding">Item Code</th>
+                                    <th scope="col" align="center" class="addPadding">Description Of Goods</th>
+                                    <th scope="col" align="center" class="addPadding" style="display:none;">Pack Size</th>
+                                    <th scope="col" align="center" class="addPadding">Batch</th>
+                                    <th scope="col" align="center" class="addPadding">MRP</th>
+                                    <th scope="col" align="center" class="addPadding">Rate</th>
+                                    <th scope="col" align="center" class="addPadding">Qty</th>
+                                    <th scope="col" align="center" class="addPadding">Amount</th>
+                                </tr>
+                                @foreach (var obj in Model.objListProduct)
+                                {
+                                    <tr style="font-size:small;">
+
+                                        <td>@count.</td>
+                                        <td class="gridleftalign addPadding">
+                                            <span id="GridView1_ctl02_LblProductId">
+                                                @obj.ProductCodeStr
+                                            </span>
+                                        </td>
+                                      
+                                        <td class="gridleftalign addPadding">
+                                            <b>@obj.ProductName</b>
+                                        </td>
+                                        <td class="gridleftalign addPadding" style="display:none;">
+                                            <span id="GridView1_ctl02_LblBarcode">
+                                                @obj.Size
+                                            </span>
+                                        </td>
+                                        <td class="gridleftalign addPadding">
+                                            <span id="GridView1_ctl02_LblBarcode">
+                                                @obj.BatchNo
+                                            </span>
+                                        </td>
+                                        
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblMRP">
+                                                @obj.MRP
+                                            </span>
+                                        </td>
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblRate">
+                                                @obj.DP
+                                            </span>
+                                        </td>
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblQty">
+                                                @obj.OrderedOty
+                                            </span>
+                                        </td>
+                                        <td class="gridalign addPadding">
+                                            <span id="GridView1_ctl02_LblTotalAmount">
+
+                                                @(obj.DP * obj.OrderedOty)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                                     
+
+                                                    }
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+
+                                    
+                                    <td></td>
+                                    <td></td>
+
+                                    <td></td>
+                                    <td></td>
+                                   
+                                    <td style="text-align:center">
+                                        <b>
+                                            @Math.Round(Model.TotalOrdQty,0)
+                                        </b>
+                                    </td>
+
+                                    <td class="gridalign addPadding">
+                                        <span id="GridView1_ctl02_LblBV">
+                                            <b>
+                                                @Model.NetPayable
+                                            </b>
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+
+            <tr class="removeallborder">
+                <td colspan="3" class="removeallborder addLeftPadding" valign="bottom" style="width:65%">
+                    <b>
+                        @if (Model.objListProduct[0].OrderType == "T")
+                        {
+
+                            @Model.objListProduct[0].Remarks
+                            <br /><br />
+                        }
+                    </b>
+
+                </td>
+
+                <td colspan="2" class="removeallborder addRightPadding" style="text-align :right;vertical-align:top ">
+                    <br />
+                    <span id="lblNetPayable" text-align="Right">Net Payable :</span>
+                    <span id="lblNetPayabletxt" text-align="Right">@Model.objListProduct[0].TotalNetPayable</span>
+                </td>
+
+            </tr>
+
+           
+
+        </tbody>
+    </table>
+    @*<center><span id="lblRegdOffice" align="center" style="font-size:11px;">This is computer generated invoice, doesn't require signature.</span></center>*@
+</div>

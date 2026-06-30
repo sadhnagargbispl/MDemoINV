@@ -1,0 +1,187 @@
+﻿@model InventoryManagement.Entity.Common.GSTMasterLIST
+@{
+    ViewBag.Title = "ADDEditGST";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var ActionValue = "";
+}
+
+<style>
+    .input-readonly {
+        background-color: #EBEBE4;
+    }
+
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+</style>
+
+<script type="text/javascript">
+    var ErrorFlag = true;
+    var SizeOfImage;
+    var ProductGrid = [];
+    var ItemList = [];
+    var ProductModel = null;
+    var grid, dialog;
+    $(document).ready(function () {
+        //
+        //
+        $(".preloader").hide();
+        var ActionName = '@ActionValue';
+        $("form[name=BarcodeForm]").unbind("submit");
+        $("form[name=BarcodeForm]").bind('submit', function (e) {
+            $("#SaveProductMasterBtn").attr("disabled", true);
+            debugger;
+           AddToGrid();
+            var error = false;
+            var GSTTax = $("#GSTTax").val();
+            if (GSTTax == null || GSTTax == "") {
+                error = true;
+                $("#SaveProductMasterBtn").attr("disabled", false);
+                OpenDialog("dialogMessage", "Please enter GST.", "false");
+            }
+            if (error == false) {
+                e.preventDefault();
+                e.stopPropagation();
+                var ListObjStr = JSON.stringify(ProductGrid);
+                $("#ListObjHidden").val(ListObjStr);
+                var formdata = new FormData($(this)[0]);
+                var link = "";
+                if (ActionName == "Edit") {
+                    link = '@Url.Action("EditGST", "Product")';
+                }
+                else {
+                    link = '@Url.Action("SaveGST", "Product")';
+                }
+                $.ajax({
+                    url: link,
+                    type: 'POST',
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    success: function (objResponse) {
+                        $("#SaveProductMasterBtn").attr("disabled", false);
+                        if (objResponse != null) {
+                            OpenDialog("dialogMessage", objResponse.ResponseMessage, "false");
+                        }
+                        window.location.reload(true);
+                        ClearTextBox();
+                    },
+                    error: function (xhr, data) {
+                        //  return false;
+                        console.log(xhr);
+                        console.log("Error:", data);
+                    }
+                });
+            }
+            return false;
+        });
+
+        $("#cancelbtn").click(function () {
+            window.location.href = "/Product/GSTMasterList";
+        });
+    });
+
+    function AddToGrid() {
+        var GSTTax = $("#GSTTax").val();
+        ProductGrid.push({ "GSTTax": GSTTax, })
+    }
+
+    function OpenDialog(dialogId, Message, isConfirmation) {
+        if (isConfirmation == "true") {
+
+        }
+        else {
+            $("#" + dialogId).empty();
+            $("#" + dialogId).append('<p>' + Message + '</p>');
+
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "OK",
+                    id: "btn" + dialogId,
+                    click: function () {
+                        $("#" + dialogId).dialog("close");
+                    }
+                }]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+    }
+
+    function ClearGrid() {
+        ProductGrid = [];
+        FillGrid();
+    }
+
+    function ClearTextBox() {
+        ProductGrid = [];
+        $('#BarcodeForm')[0].reset();
+    }
+
+</script>
+
+<div class="row">
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Product > GST Master</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br />
+                    <form id="BarcodeForm" method="post" name="BarcodeForm" onsubmit="false" data-parsley-validate class="validateForm form-horizontal form-label-left">
+                        @Html.HiddenFor(m => m.id, new { name = "id", id = "id" })
+                        @Html.HiddenFor(m => m.objGSTStr, new { name = "ListObjHidden", id = "ListObjHidden" })
+                        <div class="col-lg-12">
+
+                            <div class="form-group col-lg-6">
+                                <label class="control-label col-lg-4 col-lg-4 col-sm-3 col-xs-12" for="product-name">
+                                    GST<span class="required" style="color:red">*</span>
+                                </label>
+                                <div class="col-md-6 col-sm-6 col-xs-12">
+                                    @Html.TextBoxFor(m => m.GSTTax, new { tabindex = "4", name = "GSTTax", id = "GSTTax", @class = "form-control col-md-7 col-xs-12", required = "required" })
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                    &nbsp;
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 col-md-offset-2">
+                                @*<button class="btn btn-primary" type="button" onclick="AddToGrid()">Add</button>
+                                    <button class="btn btn-primary" type="button" onclick="ClearGrid()">Clear</button>*@
+                                <button type="submit" id="SaveProductMasterBtn" class="btn btn-success">Save</button>
+                                <button class="btn btn-primary" id="cancelbtn"  type="button" onclick="reset()">Cancel</button>
+                            </div>
+                        </div>
+                        <div id="dialogMessage" title="Message">
+
+                        </div>
+                    </form>
+                    <div class="ln_solid"></div>
+
+                    <div class="col-lg-12">
+                        <table class="table bootstrap-datatable" id="grid"></table>
+                        <center><span style="display:none" id="noRecord">No Records Found</span></center>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+

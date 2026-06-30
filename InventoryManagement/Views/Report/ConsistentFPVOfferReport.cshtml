@@ -1,0 +1,378 @@
+﻿@model InventoryManagement.Entity.Common.ConsistentOffers
+@using InventoryManagement.Common
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "Consistent FPV Offer Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool IsSoldByHo = (Session["LoginUser"] as User).IsSoldByHo;
+    string CurrentPartyCode = (Session["LoginUser"] as User).PartyCode;
+    string CurrentPartyName = (Session["LoginUser"] as User).PartyName;
+    string BarcodeCaption = System.Configuration.ConfigurationManager.AppSettings["BarcodeCaption"];
+}
+<style>
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+
+    .ui-widget-header {
+        margin-top: -1% !important;
+        width: 102% !important;
+        margin-left: -1% !important;
+    }
+
+    .ui-dialog-titlebar-close {
+        margin-right: 1% !important;
+    }
+
+    .ui-widget-content {
+        background: white !important;
+        border-radius: 15px !important;
+        -webkit-border-radius: 4px !important;
+    }
+    /*.ui-widget-header .ui-icon {
+        background-color: black!important;
+    }*/
+    ui-autocomplete-input {
+        z-index: 100;
+    }
+
+    .input-readonly {
+        background-color: #EBEBE4;
+    }
+
+    .montable>tbody>tr>td, .montable>thead>tr>th {
+    padding:5px;
+    width: 120px;
+}
+    .montable > thead > tr > th {
+        text-align:center;
+    }
+   
+</style>
+<script type="text/javascript">
+    var grid, dialog;
+    var StockGrid = [{}];
+    var IsParty = false;
+    var FromDate = "", ToDate = "";
+    var IsMonthlyReport = 0;
+    $(document).ready(function () {
+
+        $(".preloader").hide();
+
+        $('#CurrentStock').click(function () {
+            $(".preloader").show();            
+            var IdNo = $("#IDNo").val();
+            var TeamWise = $("input[name='TeamWise']:checked").val();
+            GetConsistentFPVOffer(IdNo,TeamWise );
+        });
+
+        $('#MonthlyReport').click(function () {
+            $(".preloader").show();
+            var IdNo = $("#IDNo").val();
+            var TeamWise = $("input[name='TeamWise']:checked").val();
+            GetMonthlyConsistentFPVOffer(IdNo,TeamWise);
+        });
+
+        $('#IsParty').on('ifChecked', function () {
+            IsParty = true;
+            $("#IDNo").val('All');
+            $("#IDNo").prop("readonly", "readonly");
+           
+        });
+
+        $('#IsParty').on('ifUnchecked', function () {
+
+            IsParty = false;
+            $("#IDNo").val('');
+            $("#IDNo").prop("readonly", "");
+            
+        });
+
+
+        $("#btnExport").on('click', function () {
+            if (IsMonthlyReport == 0) {
+                var UserTypeStr = "ConsistentFPVOfferReport";
+
+                var tableString = "<thead><tr>";
+                tableString += "<th>S.No.</th>";
+                tableString += "<th>PC ID</th>";
+                tableString += "<th>PC Name</th>";
+                tableString += "<th>Mobile No.</th>";
+                tableString += "<th>City</th>";
+
+                tableString += "<th>Amt 200</th>";
+                tableString += "<th>Amt 300</th>";
+                tableString += "<th>Amt 400</th>";
+                tableString += "<th>Amt 500</th>";
+                tableString += "<th>Amt 600</th>";
+                tableString += "<th>Amt 1000</th>";
+                tableString += "</tr></thead><tbody>";
+                for (var i = 0; i < StockGrid.length; i++) {
+                    tableString += "<tr>";
+                    tableString += "<td>" + StockGrid[i].SNo + "</td>";
+                    tableString += "<td>" + StockGrid[i].IDNo + "</td>";
+                    tableString += "<td>" + StockGrid[i].MemName + "</td>";
+                    tableString += "<td>" + StockGrid[i].Mobl + "</td>";
+                    tableString += "<td>" + StockGrid[i].City + "</td>";
+
+                    tableString += "<td>" + StockGrid[i].Amt200 + "</td>";
+                    tableString += "<td>" + StockGrid[i].Amt300 + "</td>";
+                    tableString += "<td>" + StockGrid[i].Amt400 + "</td>";
+                    tableString += "<td>" + StockGrid[i].Amt500 + "</td>";
+                    tableString += "<td>" + StockGrid[i].Amt600 + "</td>";
+                    tableString += "<td>" + StockGrid[i].Amt1000 + "</td>";
+                    tableString += "</tr>";
+                }
+                tableString += "</tbody>";
+                $("#gridExport").empty();
+                $("#gridExport").append(tableString);
+                tableToExcel('gridExport', UserTypeStr + "_Export");
+            }
+            else {
+                tableToExcel('MonthlyReportDiv', "MonthwiseConsistentFPVOfferReport");
+            }
+                
+
+            });
+
+    });
+    function toDate(dateStr) {
+        var parts = dateStr.split("-");
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }   
+
+    function fillGrid() {
+        $("#noRecord").hide();
+        IsMonthlyReport = 0;
+        $('#MonthlyReportDiv').html("");
+        if (grid != null) {
+            grid.destroy();
+            $('#grid').empty();
+
+        }
+            grid = $('#grid').grid({
+                dataSource: StockGrid,
+                uiLibrary: 'bootstrap',
+                headerFilter: true,
+                columns: [
+                    { field: 'SNo', title: 'S.No.', width: 50, sortable: true, hidden: false, filterable: false },
+                    { field: 'IDNo', title: 'PC ID', width: 130, sortable: true, hidden: false, filterable: true, align: 'center' },
+                    { field: 'MemName', width: 150, title: 'PC Name', sortable: true, hidden: false, filterable: true },
+                    { field: 'Mobl', width: 130, title: 'Mobile No.', sortable: true, hidden: false, filterable: true },
+                    { field: 'City', width: 130, title: 'City', sortable: true, hidden: false, filterable: true },
+                    { field: 'Formno', width: 50, title: 'Formno', sortable: true, hidden: true, filterable: true },
+                    { field: 'Amt200', width: 150, title: 'Amt 200', sortable: true, hidden: false, filterable: true },
+                    { field: 'Amt300', width: 150, title: 'Amt 300', sortable: true, hidden: false, filterable: true },
+                    { field: 'Amt400', width: 150, title: 'Amt 400', sortable: true, hidden: false, filterable: true },
+                    { field: 'Amt500', width: 150, title: 'Amt 500', sortable: true, hidden: false, filterable: true },
+                    { field: 'Amt600', width: 150, title: 'Amt 600', sortable: true, hidden: false, filterable: true },
+                    { field: 'Amt1000', width: 150, title: 'Amt 1000', sortable: true, hidden: false, filterable: true }
+                ],
+                pager: { limit: 50, sizes: [15, 20, 35, 50, 65, 80, 95, 100] }
+                //pager: { limit: 50, sizes: [15, 20, 35, 50, 65, 80, 95, 100] },
+                //dataBound: function (e, records, totalRecords) {
+                //    $("#TotalBillAmount").html(Math.trunc(parseFloat(TotalBillAmount)));
+                //    $("#TotalAmountRecieved").html(Math.trunc(parseFloat(TotalAmountRecieved)));
+                //    $("#TotalCreditvalue").html(Math.trunc(parseFloat(TotalCreditvalue)));
+                //}
+            });
+
+        $(".loader").hide();
+    }
+
+
+    function GetMonthlyConsistentFPVOffer(IdNo, TeamWise) {
+        $.ajax({
+            url: '@Url.Action("GetMonthlyConsistentFPVOffer", "Report")',
+            type: 'POST',
+            data: { "IdNo": IdNo, "TeamWise": TeamWise },
+            dataType: "json",
+                beforeSend: function () {
+                    $(".preloader").show();
+                },
+        complete: function () {
+            $(".preloader").hide();
+        },
+            success: function (objResult) {
+                StockGrid = [{}];
+                $('#MonthlyReportDiv').html("");
+                $('#grid').empty();
+                if (grid != null) {
+                    grid.destroy();                   
+                }
+                
+                $("#noRecord").hide();
+                IsMonthlyReport = 1;
+                $('#MonthlyReportDiv').html(objResult);
+                $(".preloader").hide();
+
+            },
+            error: function (xhr, data) {
+                //  return false;
+                console.log(xhr);
+                console.log("Error:", data);
+            }
+        });
+    }
+
+
+
+    function GetConsistentFPVOffer(IdNo, TeamWise) {
+            $.ajax({
+                url: '@Url.Action("GetConsistentFPVOffer", "Report")',
+                type: 'POST',
+                data: { "IdNo": IdNo, "TeamWise": TeamWise },
+                dataType: "json",
+                beforeSend: function () {
+                    $(".preloader").show();
+                },
+                complete: function () {
+                    $(".preloader").hide();
+                },
+                success: function (objResult) {
+                    StockGrid = [{}];
+                    if (objResult.length > 0) {
+                        StockGrid = StockGrid.splice(1);
+                        for (var i = 0; i < objResult.length; i++) {
+
+                            @*var InvoicePath = '@Url.Action("InvoicePrint", "Transaction", new {Pm="-1"})';
+                            var encodedparameters = objResult[i].BillNo;
+                           var EncryptedB64Url = window.btoa(encodedparameters);
+                            console.log("EncryptedB64Url", EncryptedB64Url);
+                            InvoicePath = InvoicePath.replace("-1", EncryptedB64Url);*@
+
+                            StockGrid.push({
+                                "SNo": i + 1,
+                                "IDNo": objResult[i].IDNo,
+                                "MemName": objResult[i].MemName,
+                                "Mobl": objResult[i].Mobl,
+                                "City": objResult[i].City,
+                                "Formno": objResult[i].Formno,
+                                "Amt200": objResult[i].Amt200,
+                                "Amt300": objResult[i].Amt300,
+                                "Amt400": objResult[i].Amt400,
+                                "Amt500": objResult[i].Amt500,
+                                "Amt600": objResult[i].Amt600,
+                                "Amt1000": objResult[i].Amt1000
+                            });
+                            //TotalBillAmount += parseFloat(objResult[i].RCPAmount);
+                            //TotalAmountRecieved += parseFloat(objResult[i].AmountRecieved);
+                            //TotalCreditvalue += parseFloat(objResult[i].CreditNoteValue);
+                        }
+                        $("#noRecord").hide();
+                    }
+                    else {
+
+                        $("#noRecord").show();
+                    }
+                    fillGrid();
+                    $(".preloader").hide();
+
+                },
+                error: function (xhr, data) {
+                    //  return false;
+                    console.log(xhr);
+                    console.log("Error:", data);
+                }
+            });
+    }
+</script>
+
+<div class="row">
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Consistent FPV Offer Report</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br />
+                  
+                    <form id="distributorForm" method="post" name="distributorForm" onsubmit="false" data-parsley-validate class="validateForm form-horizontal form-label-left">
+                        <div class="col-lg-12">
+
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label class="control-label col-lg-2 col-md-2 col-sm-3 col-xs-12" for="category-name">
+                                        Enter ID No:-
+                                    </label>
+                                    <div class="col-lg-9 col-md-9 col-sm-8 col-xs-9" style="padding-left: 0.5%;">
+                                        @Html.TextBoxFor(m => m.IDNo, new { name = "IDNo", id = "IDNo", tabindex = "1", @class = "form-control col-md-7 col-xs-12" })
+                                    </div>
+                                    <div id="IsPartyDiv" class="col-lg-1 col-md-1 col-sm-1 col-xs-3" style="padding-left: 0.5%;">
+                                        <label>
+                                            <input type="checkbox" id="IsParty" name="IsParty" class="flat" tabindex="6" />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="col-lg-12">
+
+                                <div class="col-lg-8">
+                                    
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-2 col-md-2 col-sm-3 col-xs-12" for="category-name">
+                                           Get Report:
+                                        </label>
+                                        <label class="control-label col-lg-5 col-md-5 col-sm-5 col-xs-12" for="category-name">
+                                            <input type="radio" name="TeamWise" value="false" checked="checked">PCID Wise
+                                        </label>
+                                        <label class="control-label col-lg-5 col-md-5 col-sm-5 col-xs-12" for="category-name">
+                                            <input type="radio" name="TeamWise" value="true">PCID Team Wise
+                                        </label>                                        
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-4">
+                                    <div class="form-group">
+                                        <input type="button" id="CurrentStock" name="CurrentStock" value="Get Report" /> &nbsp;&nbsp;
+                                        <input type="button" id="MonthlyReport" name="MonthlyReport" value="Get Monthly Report" />
+                                        <img src="~/images/ExcelImage.jpg" id="btnExport" style="height: 25px;cursor:pointer" />
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <table id="gridExport" style="display:none"></table>
+
+</form>
+
+
+                </div>
+                @*<div class="col-lg-12">
+                    <div class="col-lg-3">&nbsp;</div>
+                    <div class="col-lg-3">Total RCP Value: <span id="TotalBillAmount"></span></div>
+                    <div class="col-lg-3">Total Amount Recieved: <span id="TotalAmountRecieved"></span></div>
+                    <div class="col-lg-3">Total Credit value: <span id="TotalCreditvalue"></span></div>
+                </div>*@
+                <div class="col-lg-12">
+
+                    <div class="form-group">
+                        <div class="col-lg-12" id="MonthlyReportDiv" style="overflow:auto"></div>
+                        <table class="table bootstrap-datatable" id="grid"></table>
+                        <center><span style="display:none" id="noRecord">No Records Found</span></center>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="dialogMessage" title="Message">
+
+    </div>
+
+</div>

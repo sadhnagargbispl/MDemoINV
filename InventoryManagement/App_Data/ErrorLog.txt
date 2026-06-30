@@ -1,0 +1,23 @@
+
+===================================
+STEP 1 : Method Start
+Date : 15-05-2026 19:14:54
+STEP 2 : Before Filters
+STEP 3 : Filter Applied
+STEP 4 : Query Created
+QUERY : Select 0 as Blank,a.OrderNo,Replace(Convert(varchar,a.OrderDate,106),' ','-') as ODte,a.IDNo,a.MemFirstName + ' ' + a.MemLastName as MemName,a.OrderAmt,a.Remark,a.Address1,a.Pincode,a.Mobl,a.OrderType,CASE WHEN a.OrderTYpe='T' THEN 'Activation' ELSE 'Product Request' END AS OType,CASE WHEN HostIP='C' THEN 'By Courier' WHEN HostIP='S' THEN 'By Speed Post' WHEN HostIP='H' THEN 'By Hand - '+ b.PartyName ELSE b.PartyName END As OrdFor,Case WHEN a.DispatchStatus='N' AND a.DispatchQty=0 THEN 'Reject' ELSE '' END as Reject From dv9wellnes..TrnOrder a,dv9wellnesinv..M_LedgerMaster b Where a.OrderFor=b.PartyCode AND a.ActiveStatus='Y' AND a.DispatchStatus='N'  Order By OrderDate
+STEP 5 : DB Connection Open
+STEP 6 : Reader Execute
+STEP 7 : Total Record = 4
+STEP 8 : Method End
+===================================
+STEP 1 : Method Start
+Date : 16-05-2026 11:30:50
+STEP 2 : Before Filters
+STEP 3 : Filter Applied
+STEP 4 : Query Created
+QUERY : Select 0 as Blank,a.OrderNo,Replace(Convert(varchar,a.OrderDate,106),' ','-') as ODte,a.IDNo,a.MemFirstName + ' ' + a.MemLastName as MemName,a.OrderAmt,a.Remark,a.Address1,a.Pincode,a.Mobl,a.OrderType,CASE WHEN a.OrderTYpe='T' THEN 'Activation' ELSE 'Product Request' END AS OType,CASE WHEN HostIP='C' THEN 'By Courier' WHEN HostIP='S' THEN 'By Speed Post' WHEN HostIP='H' THEN 'By Hand - '+ b.PartyName ELSE b.PartyName END As OrdFor,Case WHEN a.DispatchStatus='N' AND a.DispatchQty=0 THEN 'Reject' ELSE '' END as Reject From dv9wellnes..TrnOrder a,dv9wellnesinv..M_LedgerMaster b Where a.OrderFor=b.PartyCode AND a.ActiveStatus='Y' AND a.DispatchStatus='N'  Order By OrderDate
+STEP 5 : DB Connection Open
+STEP 6 : Reader Execute
+STEP 7 : Total Record = 4
+STEP 8 : Method End

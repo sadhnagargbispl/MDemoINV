@@ -1,0 +1,628 @@
+﻿@model InventoryManagement.Entity.Common.IssueSampleProduct
+@using InventoryManagement.Common
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "ShopeeReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool IsSoldByHo = (Session["LoginUser"] as User).IsSoldByHo;
+    string CurrentPartyCode = (Session["LoginUser"] as User).PartyCode;
+    string CurrentPartyName = (Session["LoginUser"] as User).PartyName;
+    string PartyCaption = System.Configuration.ConfigurationManager.AppSettings["PartyCaption"];
+}
+<style>
+    .gj-grid-wrapper {
+        min-width: 100% !important;
+        overflow-x: scroll !important;
+    }
+
+    .ui-widget-header {
+        margin-top: -1% !important;
+        width: 102% !important;
+        margin-left: -1% !important;
+    }
+
+    .ui-dialog-titlebar-close {
+        margin-right: 1% !important;
+    }
+
+    .ui-widget-content {
+        background: white !important;
+        border-radius: 15px !important;
+        -webkit-border-radius: 4px !important;
+    }
+    /*.ui-widget-header .ui-icon {
+        background-color: black!important;
+    }*/
+    ui-autocomplete-input {
+        z-index: 100;
+    }
+
+    .input-readonly {
+        background-color: #EBEBE4;
+    }
+</style>
+<script type="text/javascript">
+    var grid, dialog;
+    var DataGrid = [];
+    var objColumns = [];
+    var IsParty = false;
+    var PartyList = [];
+    var FullPartyList;
+    var sale = true;
+    var fv = true;
+    var fvamt = true;
+    var fvbills = true;
+    var rv = true;
+    var rvamt = true;
+    var rvbills = true;
+    var stock = true;
+
+    $(document).ready(function () {
+        $(".preloader").hide();
+        var IsAdministrator = '@IsSoldByHo';
+        if (IsAdministrator == "True") {
+            GetAllParty();
+        }
+        else {
+            $("#PartyCode").val('@CurrentPartyCode');
+        }
+        $("#RptType").change(function () {
+            fillGrid();
+        });
+
+        $("#PartyName").autocomplete({
+            source: function (request, response) {
+                var results = $.ui.autocomplete.filter(PartyList, request.term);
+                response(results.slice(0, 50));
+            },
+            minLength: 1,
+            scroll: true,
+            select: function (event, ui) {
+                $("#PartyName").val(ui.item.label);
+                SetSpecificCode("Party", ui.item.label);
+                return false;
+            },
+
+        }).focus(function () {
+            $(this).autocomplete("search", "");
+        });
+
+        $('#IsParty').on('ifChecked', function () {
+            IsParty = true;
+            $("#PartyName").val('All');
+            $("#PartyName").prop("readonly", "readonly");
+            $("#PartyCode").val('');
+        });
+
+        $('#IsParty').on('ifUnchecked', function () {
+
+            IsParty = false;
+            $("#PartyName").val('');
+            $("#PartyName").prop("readonly", "");
+            $("#PartyCode").val('');
+        });
+
+        $('#CurrentStock').click(function () {
+            $(".preloader").show();
+            var PartyCode = $("#PartyCode").val();
+            GetDetails(PartyCode);
+        });
+
+        $("#btnExport").on('click', function () {
+            var UserTypeStr = "ShoppeReport";
+
+            var tableString = "<thead><tr>";
+
+            tableString += "<th>S.No.</th>";
+            tableString += "<th>@PartyCaption Code</th>";
+            tableString += "<th>@PartyCaption Name</th>";
+            tableString += "<th>Username</th>";
+            
+            if (walletBal == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'WalletBalance'))].column + "</th>";
+            }
+            if (sale == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalSale'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayBillCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodaySale'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthSale'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthSale'))].column + "</th>";
+            }
+            if (fv == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalFV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayFV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthFV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDFV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthFV'))].column + "</th>";
+            }
+
+            if (fvamt == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalFVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayFVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthFVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDFVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthFVAmt'))].column + "</th>";
+            }
+            if (fvbills == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalFVCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayFVBillCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthFVBillCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDFVCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthFVCnt'))].column + "</th>";
+            }
+            if (rv == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalRV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayRV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthRV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDRV'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthRV'))].column + "</th>";
+            }
+            if (rvamt == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalRVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayRVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthRVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDRVAmt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthRVAmt'))].column + "</th>";
+            }
+            if (rvbills == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TotalRVCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'TodayRVBillCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthRVBillCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'LastMnthTDRVCnt'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'MnthRVCnt'))].column + "</th>";
+            }
+            if (stock == false) {
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'StockVal'))].column + "</th>";
+                tableString += "<th>" + objColumns[objColumns.findIndex((obj => obj.Name == 'StockQty'))].column + "</th>";
+            }
+            
+            tableString += "</tr></thead><tbody>";
+            for (var i = 0; i < DataGrid.length; i++) {
+                tableString += "<tr>";
+                tableString += "<td>" + DataGrid[i].SNo + "</td>";
+                tableString += "<td>" + DataGrid[i].PartyCode + "</td>";
+                tableString += "<td>" + DataGrid[i].PartyName + "</td>";
+                tableString += "<td>" + DataGrid[i].UserName + "</td>";
+                
+                if (walletBal == false) {
+                    tableString += "<td>" + DataGrid[i].WalletBalance + "</td>";
+                }
+                if (sale == false) {
+                    tableString += "<td>" + DataGrid[i].TotalSale + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayBillCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodaySale + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthSale + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthSale + "</td>";
+                }
+                if (fv == false) {
+                    tableString += "<td>" + DataGrid[i].TotalFV + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayFV + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthFV + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDFV + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthFV + "</td>";
+                }
+                if (fvamt == false) {
+                    tableString += "<td>" + DataGrid[i].TotalFVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayFVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthFVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDFVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthFVAmt + "</td>";
+                }
+                if (fvbills == false) {
+                    tableString += "<td>" + DataGrid[i].TotalFVCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayFVBillCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthFVBillCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDFVCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthFVCnt + "</td>";
+                }
+                if (rv == false) {
+                    tableString += "<td>" + DataGrid[i].TotalRV + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayRV + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthRV + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDRV + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthRV + "</td>";
+                }
+                if (rvamt == false) {
+                    tableString += "<td>" + DataGrid[i].TotalRVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayRVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthRVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDRVAmt + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthRVAmt + "</td>";
+                }
+                if (rvbills == false) {
+                    tableString += "<td>" + DataGrid[i].TotalRVCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].TodayRVBillCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthRVBillCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].LastMnthTDRVCnt + "</td>";
+                    tableString += "<td>" + DataGrid[i].MnthRVCnt + "</td>";
+                }
+                if (stock == false) {
+                    tableString += "<td>" + DataGrid[i].StockVal + "</td>";
+                    tableString += "<td>" + DataGrid[i].StockQty + "</td>";
+                }
+                
+                tableString += "</tr>";
+            }
+
+            tableString += "</tbody>";
+            $("#gridExport").empty();
+            $("#gridExport").append(tableString);
+            tableToExcel('gridExport', UserTypeStr + "_Export");
+        });
+    });
+
+    function toDate(dateStr) {
+        var parts = dateStr.split("-");
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    function SetSpecificCode(type, label) {
+        if (type == "Party") {
+            for (var i = 0; i < FullPartyList.length; i++) {
+                if (FullPartyList[i].PartyName == label) {
+                    $("#PartyCode").val(FullPartyList[i].PartyCode);
+                    break;
+                }
+            }
+        }
+    }
+
+
+    function GetAllParty() {
+        $.ajax({
+            url: '/Report/GetAllPartyListForReportswithMS',
+            dataType: 'JSON',
+            method: 'GET',
+            //data: { 'LedgerName': '' },
+            success: function (data) {
+                console.log("data:", data);
+                //response(data);
+                FullPartyList = data;
+                PartyList = [];
+                if (data != null) {
+                    var i = 0;
+                    for (i = 0; i < data.length; i++) {
+                        //console.log("data[i]", data[i]);
+                        PartyList.push(data[i].PartyName);
+                    }
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function OpenDialog(dialogId, Message, isConfirmation) {
+        $("#" + dialogId).empty();
+        $("#" + dialogId).append('<p>' + Message + '</p>');
+        if (isConfirmation == "true") {
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "Yes",
+                    id: "btnYes" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = true;
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                },
+                {
+                    text: "No",
+                    id: "btnNo" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = false;
+                        $("#" + dialogId).dialog("close");
+                    }
+                }
+                ]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+        else {
+
+
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "OK",
+                    id: "btn" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                }]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+
+    }
+    function fillGrid() {
+        var rptType = $("#RptType").val();
+        sale = true; fv = true; fvamt = true; fvbills = true; rv = true; rvamt = true; rvbills = true; stock = true,walletBal = true;
+
+        if (rptType == "all")
+        { sale = false; fv = false; fvamt = false; fvbills = false; rv = false; rvamt = false; rvbills = false; stock = false; walletBal = false; }
+        else if(rptType == "sale")
+        { sale = false; }
+        else if (rptType == "fv")
+        { fv = false; }
+        else if (rptType == "fvamt")
+        { fvamt = false; }
+        else if (rptType== "fvbill")
+        { fvbills = false; }
+        else if (rptType == "rv")
+        { rv = false; }
+        else if (rptType == "rvamt")
+        { rvamt = false; }
+        else if (rptType == "rvbill")
+        { rvbills = false; }
+        else if (rptType == "stock")
+        { stock = false; }
+        else if (rptType == "walletbalance")
+        { walletBal = false; }
+
+        $("#noRecord").hide();
+        if (grid != null) {
+            grid.destroy();
+            $('#grid').empty();
+
+        }
+        var j = 0;
+        grid = $('#grid').grid({
+            dataSource: DataGrid,
+            uiLibrary: 'bootstrap',
+            headerFilter: true,
+            columns: [
+                { field: 'SNo', title: 'S.No.', width: 50, sortable: true, hidden: false, filterable: false },
+                { field: 'PartyCode', width: 80, title: '@PartyCaption Code', sortable: true, hidden: false, filterable: true },
+{ field: 'PartyName', width: 80, title: '@PartyCaption Name', sortable: true, hidden: false, filterable: true },
+{ field: 'UserName', width: 80, title: 'Username', sortable: true, hidden: false, filterable: true },
+{ field: 'WalletBalance', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "WalletBalance"))].column, sortable: true, hidden: walletBal, filterable: true },
+{ field: 'TotalSale', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalSale"))].column, sortable: true, hidden: sale, filterable: true },
+{ field: 'TodayBillCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayBillCnt"))].column, sortable: true, hidden: sale, filterable: true },
+{ field: 'TodaySale', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodaySale"))].column, sortable: true, hidden: sale, filterable: true },
+{ field: 'LastMnthSale', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthSale"))].column, sortable: true, hidden: sale, filterable: true },
+{ field: 'LastMnthTDAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDAmt"))].column, sortable: true, hidden: sale, filterable: true },
+{ field: 'MnthSale', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthSale"))].column, sortable: true, hidden: sale, filterable: true },
+
+{ field: 'TotalFV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalFV"))].column, sortable: true, hidden: fv, filterable: true },
+{ field: 'TodayFV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayFV"))].column, sortable: true, hidden: fv, filterable: true },
+{ field: 'LastMnthFV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthFV"))].column, sortable: true, hidden: fv, filterable: true },
+{ field: 'LastMnthTDFV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDFV"))].column, sortable: true, hidden: fv, filterable: true },
+{ field: 'MnthFV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthFV"))].column, sortable: true, hidden: fv, filterable: true },
+
+{ field: 'TotalFVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalFVAmt"))].column, sortable: true, hidden: fvamt, filterable: true },
+{ field: 'TodayFVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayFVAmt"))].column, sortable: true, hidden: fvamt, filterable: true },
+{ field: 'LastMnthFVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthFVAmt"))].column, sortable: true, hidden: fvamt, filterable: true },
+{ field: 'LastMnthTDFVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDFVAmt"))].column, sortable: true, hidden: fvamt, filterable: true },
+{ field: 'MnthFVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthFVAmt"))].column, sortable: true, hidden: fvamt, filterable: true },
+
+{ field: 'TotalFVCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalFVCnt"))].column, sortable: true, hidden: fvbills, filterable: true },
+{ field: 'TodayFVBillCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayFVBillCnt"))].column, sortable: true, hidden: fvbills, filterable: true },
+{ field: 'LastMnthFVBillCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthFVBillCnt"))].column, sortable: true, hidden: fvbills, filterable: true },
+{ field: 'LastMnthTDFVCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDFVCnt"))].column, sortable: true, hidden: fvbills, filterable: true },
+{ field: 'MnthFVCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthFVCnt"))].column, sortable: true, hidden: fvbills, filterable: true },
+
+{ field: 'TotalRV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalRV"))].column, sortable: true, hidden: rv, filterable: true },
+{ field: 'TodayRV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayRV"))].column, sortable: true, hidden: rv, filterable: true },
+{ field: 'LastMnthRV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthRV"))].column, sortable: true, hidden: rv, filterable: true },
+{ field: 'LastMnthTDRV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDRV"))].column, sortable: true, hidden: rv, filterable: true },
+{ field: 'MnthRV', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthRV"))].column, sortable: true, hidden: rv, filterable: true },
+
+{ field: 'TotalRVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalRVAmt"))].column, sortable: true, hidden: rvamt, filterable: true },
+{ field: 'TodayRVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayRVAmt"))].column, sortable: true, hidden: rvamt, filterable: true },
+{ field: 'LastMnthRVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthRVAmt"))].column, sortable: true, hidden: rvamt, filterable: true },
+{ field: 'LastMnthTDRVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDRVAmt"))].column, sortable: true, hidden: rvamt, filterable: true },
+{ field: 'MnthRVAmt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthRVAmt"))].column, sortable: true, hidden: rvamt, filterable: true },
+
+{ field: 'TotalRVCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TotalRVCnt"))].column, sortable: true, hidden: rvbills, filterable: true },
+{ field: 'TodayRVBillCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "TodayRVBillCnt"))].column, sortable: true, hidden: rvbills, filterable: true },
+{ field: 'LastMnthRVBillCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthRVBillCnt"))].column, sortable: true, hidden: rvbills, filterable: true },
+{ field: 'LastMnthTDRVCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "LastMnthTDRVCnt"))].column, sortable: true, hidden: rvbills, filterable: true },
+{ field: 'MnthRVCnt', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "MnthRVCnt"))].column, sortable: true, hidden: rvbills, filterable: true },
+
+{ field: 'StockVal', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "StockVal"))].column, sortable: true, hidden: stock, filterable: true },
+{ field: 'StockQty', width: 80, title: objColumns[objColumns.findIndex((obj => obj.Name == "StockQty"))].column, sortable: true, hidden: stock, filterable: true },
+
+ ],
+            pager: { limit: 50, sizes: [15, 20, 35, 50, 65, 80, 95, 100] }
+        });
+
+        $(".loader").hide();
+    }
+
+    function GetDetails(PartyCode) {
+        $.ajax({
+            url: '@Url.Action("GetShoppeReport", "Report")',
+            type: 'POST',
+            data: { "PartyCode": PartyCode },
+            dataType: "json",
+            success: function (objResult) {
+                DataGrid = [];
+                objColumns = objResult.columns;
+                if (objResult.DashboardData.length > 0) {
+
+                    for (var i = 0; i < objResult.DashboardData.length; i++) {
+                        DataGrid.push({
+                            "SNo": i + 1,
+                            "PartyCode": objResult.DashboardData[i].PartyCode,
+                            "PartyName": objResult.DashboardData[i].PartyName,
+                            "UserName": objResult.DashboardData[i].UserName,
+                            "TotalSale": objResult.DashboardData[i].TotalSale,
+                            "TotalFV": objResult.DashboardData[i].TotalFV,
+                            "TotalRV": objResult.DashboardData[i].TotalRV,
+                            "TotalFVAmt": objResult.DashboardData[i].TotalFVAmt,
+                            "TotalRVAmt": objResult.DashboardData[i].TotalRVAmt,
+                            "LastMnthSale": objResult.DashboardData[i].LastMnthSale,
+                            "LastMnthFV": objResult.DashboardData[i].LastMnthFV,
+                            "LastMnthRV": objResult.DashboardData[i].LastMnthRV,
+                            "LastMnthFVAmt": objResult.DashboardData[i].LastMnthFVAmt,
+                            "LastMnthRVAmt": objResult.DashboardData[i].LastMnthRVAmt,
+                            "LastMnthTDAmt": objResult.DashboardData[i].LastMnthTDAmt,
+                            "LastMnthTDFV": objResult.DashboardData[i].LastMnthTDFV,
+                            "LastMnthTDRV": objResult.DashboardData[i].LastMnthTDRV,
+                            "LastMnthTDFVAmt": objResult.DashboardData[i].LastMnthTDFVAmt,
+                            "LastMnthTDRVAmt": objResult.DashboardData[i].LastMnthTDRVAmt,
+                            "MnthSale": objResult.DashboardData[i].MnthSale,
+                            "MnthFV": objResult.DashboardData[i].MnthFV,
+                            "MnthRV": objResult.DashboardData[i].MnthRV,
+                            "MnthFVAmt": objResult.DashboardData[i].MnthFVAmt,
+                            "MnthRVAmt": objResult.DashboardData[i].MnthRVAmt,
+                            "TodaySale": objResult.DashboardData[i].TodaySale,
+                            "TodayFV": objResult.DashboardData[i].TodayFV,
+                            "TodayRV": objResult.DashboardData[i].TodayRV,
+                            "TodayFVAmt": objResult.DashboardData[i].TodayFVAmt,
+                            "TodayRVAmt": objResult.DashboardData[i].TodayRVAmt,
+                            "TodayBillCnt": objResult.DashboardData[i].TodayBillCnt,
+                            "TodayFVBillCnt": objResult.DashboardData[i].TodayFVBillCnt,
+                            "TodayRVBillCnt": objResult.DashboardData[i].TodayRVBillCnt,
+                            "StockVal": objResult.DashboardData[i].StockVal,
+                            "StockQty": objResult.DashboardData[i].StockQty,
+                            "WRVal": objResult.DashboardData[i].WRVal,
+                            "WRQty": objResult.DashboardData[i].WRQty,
+                            "FRVal": objResult.DashboardData[i].FRVal,
+                            "FRQty": objResult.DashboardData[i].FRQty,
+                            "LastMnthFVBillCnt": objResult.DashboardData[i].LastMnthFVBillCnt,
+                            "LastMnthRVBillCnt": objResult.DashboardData[i].LastMnthRVBillCnt,
+                            "LastMnthTDFVCnt": objResult.DashboardData[i].LastMnthTDFVCnt,
+                            "LastMnthTDRVCnt": objResult.DashboardData[i].LastMnthTDRVCnt,
+                            "MnthFVCnt": objResult.DashboardData[i].MnthFVCnt,
+                            "MnthRVCnt": objResult.DashboardData[i].MnthRVCnt,
+                            "TotalFVCnt": objResult.DashboardData[i].TotalFVCnt,
+                            "TotalRVCnt": objResult.DashboardData[i].TotalRVCnt,
+                            "WalletBalance": objResult.DashboardData[i].WalletBalance
+                        });
+                    }
+                    $("#noRecord").hide();
+                }
+                else {
+
+                    $("#noRecord").show();
+                }
+                fillGrid();
+                $(".preloader").hide();
+
+            },
+            error: function (xhr, data) {
+                //  return false;
+                console.log(xhr);
+                console.log("Error:", data);
+            }
+        });
+
+
+
+    }
+</script>
+
+<div class="row">
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>@PartyCaption Report</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br />
+                    <form id="distributorForm" method="post" name="distributorForm" onsubmit="false" data-parsley-validate class="validateForm form-horizontal form-label-left">
+                        @Html.HiddenFor(m => m.partyCode, new { id = "PartyCode", name = "PartyCode" })
+                       
+                        <div class="col-lg-12">
+                           @if (IsSoldByHo)
+                                {
+                                    <div class="col-lg-8">
+                                        <div class="form-group">
+                                            <label class="control-label col-lg-2 col-md-2 col-sm-3 col-xs-12" for="category-name">
+                                                Enter Party
+                                            </label>
+                                            <div class="col-lg-9 col-md-9 col-sm-8 col-xs-9" style="padding-left: 0.5%;">
+                                                @Html.TextBoxFor(m => m.partyName, new { name = "PartyName", id = "PartyName", tabindex = "5", @class = "form-control col-md-7 col-xs-12" })
+                                            </div>
+                                            <div id="IsPartyDiv" class="col-lg-1 col-md-1 col-sm-1 col-xs-3" style="padding-left: 0.5%;">
+                                                <label>
+                                                    <input type="checkbox" id="IsParty" name="IsParty" class="flat" tabindex="6" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+                            <div class="col-lg-2">
+                               @Html.DropDownListFor( m=>m.partyName, new SelectList(new List<SelectListItem> {
+                              new SelectListItem { Text="All",Value="all"},
+                              new SelectListItem { Text="Sale",Value="sale"},
+                              new SelectListItem { Text="FV",Value="fv"},
+                              new SelectListItem { Text="FV Amt",Value="fvamt"},
+                              new SelectListItem { Text="FV Bills",Value="fvbill"},
+                              new SelectListItem { Text="RV",Value="rv"},
+                              new SelectListItem { Text="RV Amt",Value="rvamt"},
+                              new SelectListItem { Text="RV Bills",Value="rvbill"},
+                              new SelectListItem { Text="Stock",Value="stock"},
+                              new SelectListItem { Text="Wallet Balance",Value="walletbalance"}
+                          }, "Value", "Text"), new { @class = "form-control", @id = "RptType" })
+
+                            </div>
+                            </div>
+                        <dv class="col-lg-12">                            
+                            <div class="col-lg-offset-2 col-lg-4">
+                                <div class="form-group">
+                                    <input type="button" id="CurrentStock" name="CurrentStock" value="Get Report" />
+                                    <img src="~/images/ExcelImage.jpg" id="btnExport" style="height: 25px;cursor:pointer" />
+                                </div>
+                            </div>
+
+                        </dv>
+                        <table id="gridExport" style="display:none"></table>
+
+                    </form>
+
+
+                </div>
+                <div class="col-lg-12">
+
+                    <div class="form-group">
+
+                        <table class="table bootstrap-datatable" id="grid"></table>
+                        <center><span style="display:none" id="noRecord">No Records Found</span></center>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dialogMessage" title="Message">
+
+    </div>
+
+</div>

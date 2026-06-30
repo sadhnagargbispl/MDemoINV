@@ -1,0 +1,229 @@
+﻿@model InventoryManagement.Entity.Common.RewardPoint
+@using InventoryManagement.Common
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "Update LB Point";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string CurrentPartyCode = (Session["LoginUser"] as User).PartyCode;
+    string CurrentPartyName = (Session["LoginUser"] as User).PartyName;
+}
+
+<script type="text/javascript">
+
+    function OpenDialog(dialogId, Message, isConfirmation) {
+        $("#" + dialogId).empty();
+        $("#" + dialogId).append('<p>' + Message + '</p>');
+        if (isConfirmation == "true") {
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "Yes",
+                    id: "btnYes" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = true;
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                },
+                {
+                    text: "No",
+                    id: "btnNo" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = false;
+                        $("#" + dialogId).dialog("close");
+                    }
+                }
+                ]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+        else {
+
+
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "OK",
+                    id: "btn" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                }]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+
+    }
+    $(document).ready(function () {
+        $(".preloader").hide();
+
+        $("form[name=form_UpdateRPoint]").unbind("submit");
+        $("form[name=form_UpdateRPoint]").bind('submit', function (e) {
+            $("#SaveSlab").attr("disabled", true);
+            var formdata = new FormData($("#form_UpdateRPoint")[0]);
+                console.log("form data = > " + formdata);
+                $.ajax({
+                    url: '@Url.Action("SaveSlab", "Transaction")',
+                    type: 'POST',
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    success: function (objResponse) {
+                        $("#SaveSlab").removeAttr("disabled");
+                        if (objResponse != null) {
+                            if (objResponse.ResponseStatus == "OK") {
+
+                                @*var link = '@Url.Action("SaveSlab", "Transaction")';
+                                window.location.href = link;*@      
+                                OpenDialog("dialogMessage", "Saved successfuly!", "false");
+
+                            }
+                            else
+                            {
+                                OpenDialog("dialogMessage", objResponse.ResponseMessage, "false");
+                            }
+                        }
+                        return false;
+                    },
+                    error: function (xhr, data) {
+                        //  return false;
+                        console.log(xhr);
+                        console.log("Error:", data);
+                    }
+                });
+            return false;
+        });
+        $("#FromDate").datetimepicker({
+            format: "DD-MMM-YYYY",
+            extraFormats: ['M/D/YYYY', 'MM/DD/YYYY'],
+            widgetPositioning: {
+                horizontal: 'auto',
+                vertical: 'bottom'
+            }
+
+        });
+
+        $("#ToDate").datetimepicker({
+            format: "DD-MMM-YYYY",
+            extraFormats: ['M/D/YYYY', 'MM/DD/YYYY'],
+            widgetPositioning: {
+                horizontal: 'auto',
+                vertical: 'bottom'
+            }
+
+        });
+        $("#cancelClick").click(function () {
+            var link = "";
+            link = '@Url.Action("SlabMaster", "Transaction")';
+            window.location.href = link;
+        });
+    });
+    
+</script>
+
+<div class="row">
+    <div class="page-title">
+        <div class="title_left">
+            <h3>User</h3>
+        </div>
+        <div class="title_right">
+            <div class="col-md-5 col-sm-5 col-xs-12 form-group pull-right top_search">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Update Slab</h2>
+
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form id="form_UpdateRPoint" name="form_UpdateRPoint" onsubmit="false">
+                        @Html.HiddenFor(m => m.IsActionName, new { id = "IsActionName", name = "IsActionName" })
+                        @Html.HiddenFor(m => m.ID, new { id = "ID", name = "ID" })
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">From Date<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.TextBoxFor(m => m.FromDateStr, new { id = "FromDate", tabindex = "1", @required = "required", name = "FromDate", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">To Date<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.TextBoxFor(m => m.ToDateStr, new { id = "ToDate", tabindex = "2", @required = "required", name = "ToDate", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">Select Slab<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.DropDownListFor(m => m.SlabID, ViewBag.Slab as IEnumerable<SelectListItem>, new { id = "SlabID", tabindex = "3", @required = "required", name = "SlabID", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">LB Point<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.TextBoxFor(m => m.RPoint, new { id = "RPoint", tabindex = "4", @required = "required", name = "RPoint", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="col-lg-12" style="margin-top:1%">
+                            <div class="col-lg-6 col-md-offset-3">
+                                <input type="submit" id="SaveSlab" class="btn btn-success" tabindex="4" value="Save">
+                                <button class="btn btn-primary" type="button" tabindex="5" id="cancelClick">Cancel</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="dialogMessage" title="Message">
+
+    </div>
+
+</div>
+
+

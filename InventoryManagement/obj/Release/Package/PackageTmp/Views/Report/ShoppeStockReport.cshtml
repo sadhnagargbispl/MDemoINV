@@ -1,0 +1,446 @@
+﻿@model InventoryManagement.Entity.Common.StockReportModel
+@using InventoryManagement.Common
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "ShoppeStockReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool IsSoldByHo = (Session["LoginUser"] as User).IsSoldByHo;
+    string CurrentPartyCode = (Session["LoginUser"] as User).PartyCode;
+    string CurrentPartyName = (Session["LoginUser"] as User).PartyName;
+    // var ProductListJson = ViewBag.ProductJsonList;
+    string PartyCaption = System.Configuration.ConfigurationManager.AppSettings["PartyCaption"];
+}
+
+<style>
+    table, th, td {
+     padding: 5px;
+    }
+    table, th {
+      text-align: center;
+    }   
+
+    .ui-widget-header {
+        margin-top: -1% !important;
+        width: 102% !important;
+        margin-left: -1% !important;
+    }
+
+    .ui-dialog-titlebar-close {
+        margin-right: 1% !important;
+    }
+
+    .ui-widget-content {
+        background: white !important;
+        border-radius: 15px !important;
+        -webkit-border-radius: 4px !important;
+    }
+    /*.ui-widget-header .ui-icon {
+        background-color: black!important;
+    }*/
+    ui-autocomplete-input {
+        z-index: 100;
+    }
+
+    .input-readonly {
+        background-color: #EBEBE4;
+    }
+</style>
+<script type="text/javascript">
+    var grid, dialog;
+    var StockGrid = [{}];
+    var IsBatch = false;
+    var tableStockGrid;
+    var StockType = "CurrentStock";
+    var IsCategory = false;
+    var IsProduct = false;
+    var IsParty = false;
+    var ProductList = [];
+    var FullProductList;
+    var PartyList = [];
+    var FullPartyList;
+    var CategoryList = [];
+    var FullCategoryList;
+    var TotalStockIn = 0;
+    var TotalStockout = 0;
+    var TotalStockbalance = 0;
+    var NetTotal = 0;
+    var TotalRCP = 0;
+
+    $(document).ready(function () {
+        GetAllProducts(0);
+        $(".preloader").hide();
+        var IsAdministrator = '@IsSoldByHo';
+        if (IsAdministrator=="True") {
+            GetAllParty();
+        }
+        else{
+            $("#PartyCode").val('@CurrentPartyCode');
+       }
+
+        $("#ProductName").autocomplete({
+            source: function (request, response) {
+                var results = $.ui.autocomplete.filter(ProductList, request.term);
+                response(results.slice(0, 50));                
+            },
+            minLength: 1,
+            scroll: true,
+            select: function (event, ui) {
+                $("#ProductName").val(ui.item.label);
+                SetSpecificCode("Product", ui.item.label);
+                return false;
+            },
+
+        }).focus(function () {
+            $(this).autocomplete("search", "");
+        });
+
+        $("#PartyName").autocomplete({
+            source: function (request, response) {
+                var results = $.ui.autocomplete.filter(PartyList, request.term);
+                response(results.slice(0, 50));                
+            },
+            minLength: 1,
+            scroll: true,
+            select: function (event, ui) {                               
+                $("#PartyName").val(ui.item.label);
+                SetSpecificCode("Party",ui.item.label);
+                return false;
+            },
+
+        }).focus(function () {
+            $(this).autocomplete("search", "");
+        });
+
+        $('#IsProduct').on('ifChecked', function () {
+            IsProduct = true;
+            $("#ProductName").val("All");
+            $("#ProductName").prop("readonly", "readonly");
+            $("#ProductCode").val(0);
+        });
+        $('#IsProduct').on('ifUnchecked', function () {
+            IsProduct = false;
+            $("#ProductName").val("");
+            $("#ProductName").prop("readonly", "");
+            $("#ProductCode").val("");
+        });
+
+
+        $('#CurrentStock').click(function () {
+            var Month = $("#Month").val();
+            var Year = $("#Year").val();
+            var PartyCode = $("#PartyCode").val();
+            var ProductCode = $("#ProductCode").val();
+            if (PartyCode == null || PartyCode == "" || PartyCode == 0)
+            {
+                OpenDialog("dialogMessage", "Please select party!", "false");
+            }    
+           else if (Month == null || Month == "" || Month == 0)
+            {
+                OpenDialog("dialogMessage", "Please select month!", "false");
+            }
+           else if (Year == null || Year == "" || Year == 0) {
+               OpenDialog("dialogMessage", "Please select year!", "false");
+           }
+           else {
+               GetStockDetails(PartyCode, ProductCode, Month, Year);
+           }
+        });
+
+
+        $("#btnExport").on('click', function () {
+            
+           var UserTypeStr = "StockReport";
+           tableToExcel('gridExport', UserTypeStr + "_Export");
+
+            });
+    });
+
+
+
+    function SetSpecificCode(type, label) {
+        if (type == "Product") {
+            for (var i = 0; i < FullProductList.length; i++) {
+                if (FullProductList[i].ProductName == label) {
+                    $("#ProductCode").val(parseFloat(FullProductList[i].ProductCodeStr));
+                    break;
+                }
+            }
+        }
+        if (type == "Party") {
+            for (var i = 0; i < FullPartyList.length; i++) {
+                if (FullPartyList[i].PartyName == label) {
+                    $("#PartyCode").val(FullPartyList[i].PartyCode);
+                    break;
+                }
+            }
+        }
+    }
+
+   
+    function GetAllParty() {
+        $.ajax({
+            url: '/Report/GetAllPartyListForReports',
+            dataType: 'JSON',
+            method: 'GET',
+            //data: { 'LedgerName': '' },
+            success: function (data) {
+                console.log("data:", data);
+                //response(data);
+                FullPartyList = data;
+                PartyList = [];
+                if (data != null) {
+                    var i = 0;
+                    for (i = 0; i < data.length; i++) {
+                        //console.log("data[i]", data[i]);
+                        PartyList.push(data[i].PartyName);
+                    }
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function OpenDialog(dialogId, Message, isConfirmation) {
+        $("#" + dialogId).empty();
+        $("#" + dialogId).append('<p>' + Message + '</p>');
+        if (isConfirmation == "true") {
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "Yes",
+                    id: "btnYes" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = true;
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                },
+                {
+                    text: "No",
+                    id: "btnNo" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = false;
+                        $("#" + dialogId).dialog("close");
+                    }
+                }
+                ]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+        else {
+
+
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "OK",
+                    id: "btn" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                }]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+
+    }
+    
+    function GetStockDetails(PartyCode,ProductCode, Month, year) {        
+            $.ajax({
+                url: '@Url.Action("GetShoppeStockReport", "Report")',
+                type: 'POST',
+                data: { "PartyCode": PartyCode, "ProductCode": ProductCode, "Month": Month, "year": year },
+                dataType: "json",
+                success: function (objResult) {
+                    $("#gridExport").html(objResult);
+                    $(".preloader").hide();
+                },
+                error: function (xhr, data) {
+                    //  return false;
+                    console.log(xhr);
+                    console.log("Error:", data);
+                }
+            });
+    }
+
+    function GetAllProducts(catId) {
+
+        $.ajax({
+            url: '/Report/GetAllProduct',
+            dataType: "json",
+            method: 'POST',
+            async: false,
+            data: { 'CategoryCode': catId },
+            success: function (data) {
+                FullProductList = data;
+                ProductList = [];
+                if (data != null) {
+                    var i = 0;
+                    for (i = 0; i < data.length; i++) {
+                        //console.log("data[i]", data[i]);
+                        ProductList.push(data[i].ProductName);
+                    }
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log("xhr.responseText:", xhr.responseText);
+
+            }
+        });
+    }
+</script>
+
+<div class="row">
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Shoppe Stock Summary</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <br />
+                    <form id="distributorForm" method="post" name="distributorForm" onsubmit="false" data-parsley-validate class="validateForm form-horizontal form-label-left">
+                        @Html.HiddenFor(m => m.PartyCode, new { id = "PartyCode", name = "PartyCode" })
+                        @Html.HiddenFor(m => m.ProductCode, new { id = "ProductCode", name = "ProductCode" })
+                        @if (IsSoldByHo)
+                        {
+                            <div class="col-lg-12">
+                                <div class="col-lg-8">
+                                    <div class="form-group">
+                                        <label class="control-label col-lg-6 col-md-3 col-sm-3 col-xs-12" for="category-name">
+                                            Enter @PartyCaption
+                                        </label>
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="padding-left: 0.5%;">
+
+                                            @Html.TextBoxFor(m => m.PartyName, new { name = "PartyName", id = "PartyName", tabindex = "5", @class = "form-control col-md-7 col-xs-12" })
+                                        </div>
+                                    </div>
+                                </div>   
+                                <div class="col-lg-4">
+                                    &nbsp;
+                                </div>
+                                </div>
+                        }
+
+                        <div class="col-lg-12">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label class="control-label col-lg-6 col-md-3 col-sm-3 col-xs-12" for="category-name">
+                                        Enter Product @*<span class="required">*</span>*@
+                                    </label>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="padding-left: 0.5%;">
+
+                                        @Html.TextBoxFor(m => m.ProductName, new { name = "ProductName", id = "ProductName", tabindex = "3", @class = "form-control col-md-7 col-xs-12" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="form-group">
+                                    <div id="IsProductDiv">
+                                        <label>
+                                            <input type="checkbox" id="IsProduct" name="IsProduct" class="flat" tabindex="4" />
+
+
+                                        </label>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label class="control-label col-lg-6 col-md-3 col-sm-3 col-xs-12" for="category-name">
+                                        Enter Month
+                                    </label>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="padding-left: 0.5%;">
+                                        <select id="Month" class = "form-control col-md-7 col-xs-12">
+                                            <option value="1">January</option>
+                                            <option value="2">Febuary</option>
+                                            <option value="3">March</option>
+                                            <option value="4">April</option>
+                                            <option value="5">May</option>
+                                            <option value="6">June</option>
+                                            <option value="7">July</option>
+                                            <option value="8">August</option>
+                                            <option value="9">September</option>
+                                            <option value="10">October</option>
+                                            <option value="11">November</option>
+                                            <option value="12">December</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                &nbsp;
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="col-lg-8">
+                                <div class="form-group">
+                                    <label class="control-label col-lg-6 col-md-3 col-sm-3 col-xs-12" for="category-name">
+                                        Enter Year
+                                    </label>
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="padding-left: 0.5%;">
+                                        <select id="Year" class="form-control col-md-7 col-xs-12">
+                                            @for(var i = 2018;i<=DateTime.Now.Year;i++)
+                                            {
+                                                <option value="@i">@i</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <a style="cursor:pointer;color:blue;text-decoration:underline" id="CurrentStock">Generate Report</a>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<img src="~/images/ExcelImage.jpg" style="height: 25px;width: 8%;cursor:pointer" id="btnExport" />
+                            </div>
+                        </div>
+                       
+                        
+                        <div class="col-lg-12" style="max-width:1050px;overflow-x:auto;">
+                           <table id="gridExport" border=1>
+
+                           </table>
+                        </div>                        
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="dialogMessage" title="Message">
+
+    </div>
+
+</div>

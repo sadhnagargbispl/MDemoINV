@@ -1,0 +1,938 @@
+﻿
+@model InventoryManagement.Entity.Common.DistributorBillModel
+@using InventoryManagement.Common
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "InvoicePrintNew";
+    Layout = null;
+
+    string CVCaption = Convert.ToString(Session["CVCaption"]);
+    string BVCaption = Convert.ToString(Session["BVCaption"]);
+    string PVCaption = Convert.ToString(Session["PVCaption"]);
+    string RPCaption = Convert.ToString(Session["RPCaption"]);
+    string LogoPath = Convert.ToString(Session["LogoPath"]);
+    //ConnModelNew objCon = System.Web.HttpContext.Current.Session["ConModel"] as ConnModelNew;
+    int count = 1;
+    int colcount = 12;
+    decimal? bvtotal = 0;
+    decimal? pvtotal = 0;
+    int taxcolcount = 7;
+    int tcount = 0;
+}
+
+<link href="~/Content/themes/base/jquery-ui.css" rel="stylesheet" />
+<link href="~/Content/jquery-ui-1.10.4.min.css" rel="stylesheet" />
+<script src="~/Scripts/jquery-1.12.4.min.js"></script>
+<script src="~/Scripts/jquery-1.12.4.js"></script>
+<style>
+    body {
+        font-family: Verdana;
+        font-size: 10px !important;
+    }
+
+    .addAllPadding {
+        padding: 2px !important;
+    }
+
+    .rightBorderOnly {
+        border-right: 1px solid black !important;
+        border-left: 1px solid black !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        /*font-size:11px;*/
+    }
+
+    .AllBorder {
+        border: 1px solid black !important;
+        border-right: 1px solid black !important;
+        border-left: 1px solid black !important;
+        border-top: 1px solid black !important;
+        border-bottom: 1px solid black !important;
+        font-size: 11px;
+    }
+
+    .NoBorder {
+        border: None !important;
+        border-right: None !important;
+        border-left: None !important;
+        border-top: None !important;
+        border-bottom: None !important;
+        vertical-align: top;
+        /*font-size:11px;*/
+    }
+
+    table {
+        border-collapse: collapse !important;
+        width: 100%;
+        font-size: 11px;
+    }
+
+    .borderbottom {
+        border-right: none !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-bottom: 1px solid black;
+        font-size: 11px;
+    }
+
+    .topborder {
+        border-top: 1px solid black !important;
+        border-right: none !important;
+        border-left: none !important;
+        border-bottom: none !important;
+        font-size: 11px;
+    }
+</style>
+<script type="text/javascript">
+    function printPageElement() {
+        window.print();
+        return true;
+    }
+    $(document).ready(function () {
+        $(".preloader").hide();
+    });
+</script>
+<div id="DivToPrint" class="fontStyle" style="font-size:10px">
+    <div>
+        <button id="PrintPage" style="margin-left: 2%;" onclick="printPageElement()">Print</button>
+        <br />
+    </div>
+    <div>&nbsp;</div>
+    <table border="1" align="center" cellspacing="0" id="InvoicePrint" frame="box" style="font-size:0px;">
+        <tbody>
+            <tr class="borderbottom">
+                <td colspan="2" class="addAllPadding">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td colspan="2">
+                                    <b>
+                                        GSTIN&nbsp;&nbsp;:&nbsp;&nbsp;
+                                        @if (!string.IsNullOrEmpty(Model.GSTNo))
+                                        {
+                                            <span id="lblTinNotxt">@Model.GSTNo</span>
+                                        }
+                                    </b>
+                                </td>
+                                <td align="right"></td>
+                            </tr>
+                            <tr><td align="center" colspan="3"><span style="font-size:14px"><u>Tax Invoice</u></span></td></tr>
+                            <tr>
+                                <td align="center" width="10%" rowspan="2">
+                                    <img src='@LogoPath' style="max-height:80px;max-width:150px" />
+                                </td>
+
+                                <td align="center">
+                                    <span style="font-size:20px">
+                                        <b>
+                                            @if (!string.IsNullOrEmpty(Model.SoldByName))
+                                            {@Model.SoldByName}
+                                        </b>
+                                    </span>
+                                </td>
+                                <td align="center" width="11%"></td>
+                            </tr>
+
+                            <tr>
+
+                                <td width="40%">
+                                    <table>
+
+                                        <tr>
+                                            <td align="center">
+                                                @if (!string.IsNullOrEmpty(Model.SoldByAddress))
+                                                {@Model.SoldByAddress}
+                                            </td>
+                                        </tr>
+                                        @*<tr>
+                                                <td align="center">
+                                                    CIN&nbsp;&nbsp;:@if (!string.IsNullOrEmpty(Model.CinNo))
+                                                    {@Model.CinNo}
+                                                </td>
+                                            </tr>*@
+                                        <tr>
+                                            <td align="center">
+                                                <em>
+                                                    <b>
+                                                        Tel.&nbsp;:&nbsp; @if (!string.IsNullOrEmpty(Model.SoldByTel))
+                                                        {@Model.SoldByTel}
+                                                        email&nbsp;:&nbsp;@if (!string.IsNullOrEmpty(Model.SoldByEmail))
+                                                        {@Model.SoldByEmail}
+                                                    </b>
+                                                </em>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                                <td align="center" width="11%"></td>
+
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            <tr class="borderbottom">
+                <td class="addAllPadding rightBorderOnly" width="50%">
+                    <table>
+                        <tr>
+                            <td width="30%">Invoice No</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                <span id="lblInvoiceNoTxt" text-align="right">
+                                    @if (!string.IsNullOrEmpty(Model.BillNo))
+                                    {@Model.BillNo}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="30%">Date of Invoice</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                <span id="lblInvoiceNoTxt" text-align="right">
+                                    @if (Model.BillDate != null)
+                                    {@Model.BillDate.ToString("dd-MMM-yyyy")}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="30%">ID No</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @if (!string.IsNullOrEmpty(Model.objCustomer.IdNo))
+                                {@Model.objCustomer.IdNo}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="30%">Mobile No</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @if (!string.IsNullOrEmpty(Model.objCustomer.MobileNo))
+                                {@Model.objCustomer.MobileNo}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="30%">Order No.</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @if (Model.OrderNo != null)
+                                {@Model.OrderNo.ToString()}
+                            </td>
+                        </tr>
+
+
+                    </table>
+                </td>
+                <td class="addAllPadding" width="50%">
+                    <table>
+                        <tr>
+                            <td width="30%">Transport</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @if (!string.IsNullOrEmpty(Model.objListProduct[0].TransporterName))
+                                {@Model.objListProduct[0].TransporterName}
+                                @if (!string.IsNullOrEmpty(Model.objListProduct[0].CourierName))
+                                {
+                                    @Model.objListProduct[0].CourierName
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="30%">Vehicle No.</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @if (!string.IsNullOrEmpty(Model.objListProduct[0].VehicleNo))
+                                {@Model.objListProduct[0].VehicleNo}
+                            </td>
+                        </tr>
+                        @*<tr>
+                                <td width="30%">Station</td>
+                                <td width="10%">:</td>
+                                <td width="60%">
+                                    @if (!string.IsNullOrEmpty(Model.objListProduct[0].Station))
+                                    {@Model.objListProduct[0].Station}
+                                </td>
+                            </tr>*@
+                        @*<tr>
+                                <td width="30%">Eway Bill No.</td>
+                                <td width="10%">:</td>
+                                <td width="60%">
+                                    @if (!string.IsNullOrEmpty(Model.objListProduct[0].EWayBillNo))
+                                    {@Model.objListProduct[0].EWayBillNo       }
+                                </td>
+                            </tr>*@
+                        @*<tr>
+                            <td width="30%">Pan No</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @if (!string.IsNullOrEmpty(Model.objCustomer.PANNo))
+                                {@Model.objCustomer.PANNo}
+                            </td>
+                        </tr>*@
+
+                        <tr>
+
+
+                            @*<td width="30%">Station</td>*@
+                            <td width="30%">DocketNo</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @*@if (!string.IsNullOrEmpty(Model.objListProduct[0].Station))
+                                    {@Model.objListProduct[0].Station}*@
+                                @Model.objListProduct[0].DocketNo
+                            </td>
+                        </tr>
+                        <tr>
+                            @*<td width="30%">Pan No</td>*@
+                            <td width="30%">Docket Date</td>
+                            <td width="10%">:</td>
+                            <td width="60%">
+                                @*@if (!string.IsNullOrEmpty(Model.objCustomer.PANNo))
+                                    {@Model.objCustomer.PANNo}*@
+                               
+                                @*@if (Model.DocketDate != null)
+                                {@Model.DocketDate.ToString("dd-MMM-yyyy")}*@
+                             @(Model.objListProduct[0].DocketDate.HasValue
+    ? Model.objListProduct[0].DocketDate.Value.ToString("dd-MMM-yyyy")
+    : "")
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="borderbottom">
+                <td class="addAllPadding rightBorderOnly" width="50%">
+                    <em><b>Billed To:</b></em><br />
+                    <span id="lblDistNametxt" align="left">
+                        @if (!string.IsNullOrEmpty(Model.objCustomer.Name))
+                        {
+                            @Model.objCustomer.Name
+                        }
+                    </span>
+                    <br /><br />
+                    @if (!string.IsNullOrEmpty(Model.objCustomer.Address))
+                    {
+                        @Model.objCustomer.Address
+                    }
+                    @if (!string.IsNullOrEmpty(Model.objCustomer.City))
+                    {
+                        <span>, @Model.objCustomer.City</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.objCustomer.State))
+                    {
+                        <span>, @Model.objCustomer.State</span>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.objCustomer.ZipCode))
+                    {
+                        <span>, @Model.objCustomer.ZipCode</span>
+                    }
+                    <br /><br />
+                    <span>GSTIN/UIN :</span>
+                    <span id="lblDistGSTtxt" align="left">
+                        @Model.objCustomer.Aadhar
+                    </span>
+
+                </td>
+                <td class="addAllPadding" width="50%">
+                    <em><b>Shipped To:</b></em><br />
+
+                    <span id="lblDistNametxt" align="left">
+                        @*@if (objCon.CompID == "1007")
+                                {
+                                    if (!string.IsNullOrEmpty(Model.objCustomer.Prefix))
+                                    {@Model.objCustomer.Prefix}
+                                <span>&nbsp;</span>
+                            }*@
+                        @if (!string.IsNullOrEmpty(Model.objCustomer.Name))
+                        {@Model.objCustomer.Name}
+                    </span>
+                    <br />
+                    @*@if (objCon.CompID == "1007")
+                        {*@
+                    <span id="lblDistNametxt" align="left">
+                        @if (!string.IsNullOrEmpty(Model.objCustomer.Relation))
+                        {@Model.objCustomer.Relation}
+                        &nbsp;
+                        @if (!string.IsNullOrEmpty(Model.objCustomer.RelationName))
+                        {@Model.objCustomer.RelationName}
+                    </span>
+                    @*}*@
+                    <br />
+
+                    @if (!string.IsNullOrEmpty(Model.DelvAddress))
+                    {
+                        @Model.DelvAddress
+                    }
+                    else
+                    {
+                        @Model.objCustomer.Address
+                        if (!string.IsNullOrEmpty(Model.objCustomer.City))
+                        {<span>,</span> @Model.objCustomer.City}
+                        if (!string.IsNullOrEmpty(Model.objCustomer.State))
+                        {<span>,</span> @Model.objCustomer.State}
+                if (!string.IsNullOrEmpty(Model.objCustomer.ZipCode))
+                {<span>,</span> @Model.objCustomer.ZipCode}
+                    }
+
+
+
+                    <br /><br />
+                    <span>GSTIN/UIN :</span>
+                    <span id="lblDistGSTtxt" align="left">
+                        @Model.objCustomer.Aadhar
+                    </span>
+                    @*@if (objCon.CompID == "1007")
+                        {
+                            <span id="lblDistGSTtxt" align="left">
+                                @Model.objCustomer.Aadhar
+                            </span>
+                        }
+                        else
+                        {
+                            <span id="lblDistGSTtxt" align="left">
+                                @Model.objCustomer.GSTNo
+                            </span>
+                        }*@
+                </td>
+            </tr>
+            @*<tr class="borderbottom">
+                    <td class="addAllPadding rightBorderOnly"><b>Soap &amp; Toothpaste PV =@Model.SoapandToothpastepv</b></td>
+                    <td class="rightBorderOnly addAllPadding"><b>Other Product PV =@Model.OtherProductpv</b></td>
+                </tr>*@
+            <tr class="borderbottom ">
+                <td colspan="2" class="addAllPadding ">
+                    <table border="1" class="NoBorder " cellspacing="0" style="font-size:9px !important">
+                        <tr>
+                            <th scope="col" align="left" class="AllBorder" style="width:2%">S.No.</th>
+                            <th scope="col" align="left" class="addAllPadding AllBorder">Decription Of Goods</th>
+                            <th scope="col" align="left" class="addAllPadding AllBorder">Item Code</th>
+                            <th scope="col" align="left" class="addAllPadding AllBorder">HSN Code</th>
+                            <th scope="col" align="left" class="addAllPadding AllBorder">Qty</th>
+                            @*<th scope="col" align="left" class="addAllPadding AllBorder">Unit</th>*@
+                            @*@if (objCon.CompID == "1023")
+                                {
+                                    <th scope="col" align="left" class="addAllPadding AllBorder">MRP/DP</th>
+                                }
+                                else
+                                {
+                                    <th scope="col" align="left" class="addAllPadding AllBorder">MRP</th>
+                                }*@
+                            <th scope="col" align="left" class="addAllPadding AllBorder">MRP/DP</th>
+                            <th scope="col" align="left" class="addAllPadding AllBorder">Total Dis</th>
+                            <th scope="col" align="left" class="addAllPadding AllBorder">Price</th>
+                            @*@if ((Model.objListProduct[0].BillType == "B" && objCon.ShowActiveBV == "Y") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchBV == "Y"))
+                                {
+                                    <th scope="col" align="left" class="addAllPadding AllBorder">@BVCaption</th>
+                                    tcount = 1;
+                                    taxcolcount = 8;
+                                }*@
+                            @if ((Model.objListProduct[0].BillType == "B") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchBV == "Y"))
+                            {
+                                <th scope="col" align="left" class="addAllPadding AllBorder">@BVCaption</th>
+                                tcount = 1;
+                                taxcolcount = 8;
+                            }
+                            @if ((Model.objListProduct[0].BillType == "B" && Model.objCustomer.ShowActivePV == "Y") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchPV == "Y"))
+                            {
+                                <th scope="col" align="left" class="addAllPadding AllBorder">@PVCaption</th>
+                                tcount = 1;
+                                taxcolcount = 8;
+                            }
+
+                            @{
+                                DateTime CheckDate = new DateTime(2017, 7, 1);
+                                if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                {
+                                    if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                    {
+                                        <th scope="col" align="left" class="addAllPadding AllBorder">IGST (%)</th>
+                                        <th scope="col" align="left" class="addAllPadding AllBorder">IGST Amt.</th>
+                                        taxcolcount = 10;
+                                    }
+                                    else
+                                    {
+                                        <th scope="col" align="left" class="addAllPadding AllBorder">CGST (%)</th>
+                                        <th scope="col" align="left" class="addAllPadding AllBorder">CGST Amt.</th>
+                                        <th scope="col" align="left" class="addAllPadding AllBorder">SGST (%)</th>
+                                        <th scope="col" align="left" class="addAllPadding AllBorder">SGST Amt.</th>
+                                        colcount = colcount + 2;
+                                        taxcolcount = 11 + tcount;
+                                    }
+                                }
+                            }
+                            <th scope="col" align="left" class="addAllPadding AllBorder" style="width:15% ">Amount</th>
+                        </tr>
+                        @foreach (var obj in Model.objListProduct)
+                        {
+                            <tr>
+                                <td class="rightBorderOnly" align="right">&nbsp;</td>
+
+                                @*@if ((objCon.CompID == "1023" || objCon.CompID == "1038" || objCon.CompID == "1039") && obj.ProductType != "P")
+                                    {
+                                        <td class="rightBorderOnly" align="right">&nbsp;</td>
+                                    }
+                                    else
+                                    {
+                                        <td class="rightBorderOnly" align="right">@count.</td>
+                                    }*@
+                                <td class="addAllPadding rightBorderOnly">
+                                    @if (obj.OrderType == "T" && obj.Rate == 0)
+                                    {
+                                        <b>@obj.ProductName</b>
+                                    }
+                                    else
+                                    {
+                                        @obj.ProductName
+                                    }
+
+
+                                </td>
+
+                                <td class="addAllPadding rightBorderOnly">@obj.ProductCodeStr</td>
+                                <td class="addAllPadding rightBorderOnly">@obj.HSNCode</td>
+                                <td class="addAllPadding rightBorderOnly" align="right">
+                                    @{ var qty = (int)obj.Quantity;
+                                    }
+                                    @qty
+                                </td>
+                                @*<td class="addAllPadding rightBorderOnly">Pcs.</td>*@
+                                <td class="addAllPadding rightBorderOnly" align="right">@obj.MRP</td>
+                                <td class="addAllPadding rightBorderOnly" align="right">@obj.DiscAmt</td>
+                                <td class="addAllPadding rightBorderOnly" align="right">@obj.Rate</td>
+                                @if ((Model.objListProduct[0].BillType == "B" && Model.objCustomer.ShowActiveBV == "Y") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchBV == "Y"))
+                                {
+                                    <td class="addAllPadding rightBorderOnly" align="right">@obj.BVValue </td>
+                                    bvtotal += obj.BVValue;
+                                }
+
+                                @if ((Model.objListProduct[0].BillType == "B" && Model.objCustomer.ShowActivePV == "Y") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchPV == "Y"))
+                                {
+                                    <td class="addAllPadding rightBorderOnly" align="right">@obj.PVValue </td>
+                                    pvtotal += obj.PVValue;
+                                }
+                                @{
+                                    if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                    {
+                                        if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                        {
+                                            <td scope="col" class="addAllPadding rightBorderOnly" align="right">@obj.TaxPer</td>
+                                            <td scope="col" class="addAllPadding rightBorderOnly" align="right">@obj.TaxAmt</td>
+
+
+
+                                        }
+                                        else
+                                        {
+                                            <td scope="col" class="addAllPadding rightBorderOnly" align="right">@obj.CGST</td>
+                                            <td scope="col" class="addAllPadding rightBorderOnly" align="right">@obj.CGSTAmount</td>
+                                            <td scope="col" class="addAllPadding rightBorderOnly" align="right">@obj.SGST</td>
+                                            <td scope="col" class="addAllPadding rightBorderOnly" align="right">@obj.SGSTAmount</td>
+                                        }
+                                    }
+                                }
+                                <td class="addAllPadding rightBorderOnly" align="right">@(obj.Amount + obj.TaxAmt + obj.SGSTAmount + obj.CGSTAmount)</td>
+                            </tr>
+                                        //if ((objCon.CompID == "1023" || objCon.CompID == "1038" || objCon.CompID == "1039") && obj.ProductType != "P")
+                                        //{
+
+                                        //}
+                                        //else
+                                        //{
+                                        //    count = count + 1;
+                                        //}
+
+                                        count = count + 1;
+                                    }
+                        <tr class="topborder NoBorder">
+                            <td class="addAllPadding NoBorder" colspan="2"><b>Total Weight: &nbsp;</b>@Model.objListProduct[0].TotalWeight gms.</td>
+                            <td class="addAllPadding NoBorder"></td>
+                            @*@if (objCon.CompID == "1038")
+                                {
+                                    <td class="addAllPadding NoBorder" align="right"></td>
+                                    <td class="addAllPadding NoBorder" align="right"></td>
+                                }
+                                else
+                                {
+                                    <td class="addAllPadding NoBorder" align="right"><b>Grand Total</b></td>
+                                    <td class="addAllPadding NoBorder" align="right">@{var tQty = (int)Model.objProduct.TotalQty;}@tQty</td>
+                                }*@
+                            <td class="addAllPadding NoBorder" align="right"></td>
+                            <td class="addAllPadding NoBorder" align="right"></td>
+                            @*<td class="addAllPadding NoBorder">Pcs.</td>*@
+                            <td class="addAllPadding NoBorder">&nbsp;</td>
+                            <td class="addAllPadding NoBorder">&nbsp;</td>
+                            <td class="addAllPadding NoBorder">&nbsp;</td>
+                            @if ((Model.objListProduct[0].BillType == "B" && Model.objCustomer.ShowActiveBV == "Y") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchBV == "Y"))
+                            {
+                                <td class="addAllPadding NoBorder" align="right">@bvtotal</td>
+                            }
+                            @if ((Model.objListProduct[0].BillType == "B" && Model.objCustomer.ShowActivePV == "Y") || (Model.objListProduct[0].BillType != "B" && Model.objCustomer.ShowRepurchPV == "Y"))
+                            {
+                                <td class="addAllPadding NoBorder" align="right">@pvtotal</td>
+                            }
+                            @{
+                                if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                {
+                                    if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                    {
+
+                                        <td class="addAllPadding NoBorder">&nbsp;</td>
+                                        <td class="addAllPadding NoBorder">&nbsp;</td>
+                                    }
+                                    else
+                                    {
+
+                                        <td class="addAllPadding NoBorder">&nbsp;</td>
+                                        <td class="addAllPadding NoBorder">&nbsp;</td>
+                                        <td class="addAllPadding NoBorder">&nbsp;</td>
+                                        <td class="addAllPadding NoBorder">&nbsp;</td>
+                                        colcount = 14;
+                                    }
+                                }
+                            }
+
+                            @*<td class="addAllPadding NoBorder" align="right">Shipping Charge</td>*@
+                            <td class="addAllPadding AllBorder" align="right">
+                               
+                                 <b>
+                                    @Model.objProduct.TotalNetPayable
+                                </b>
+                               
+                            </td>
+                        </tr>
+
+                        <tr class="NoBorder">
+                            <td colspan=@taxcolcount class="NoBorder"><b>Offer Applied:</b> @Model.objProduct.OfferName </td>
+                            <td class="addAllPadding NoBorder" align="right"></td>
+                           
+                        </tr>
+                        <tr class="NoBorder"><td colspan=@colcount class="NoBorder"> @Model.objListProduct[0].DispStatus </td></tr>
+                        <tr class="NoBorder"><td colspan=@colcount class="NoBorder">&nbsp;</td></tr>
+                        <tr class="NoBorder">
+                            <td colspan="@colcount" class="NoBorder">
+                                <table cellspacing="0" class="NoBorder" border="1" style="font-size:12px;width:40%;">
+                                    <tbody>
+                                        <tr class="borderbottom">
+                                            <td class="borderbottom"><b>HSN Code</b></td>
+                                            @{
+                                                CheckDate = new DateTime(2017, 7, 1);
+                                                if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                {//means date is greater than 1 july 2017
+                                                    if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                    {
+                                                        <td class="borderbottom" align="right"><b>IGST Tax(%)&nbsp;</b></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="borderbottom" align="right"><b>CGST Tax(%)&nbsp;</b></td>
+                                                        <td class="borderbottom" align="right"><b>SGST Tax(%)&nbsp;</b></td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td class="borderbottom" align="right"><b>Tax(%)&nbsp;</b></td>
+                                                }
+
+                                            }
+                                            <td class="borderbottom" align="right"><b>Taxable Amt.&nbsp;</b></td>
+                                            @{
+                                                CheckDate = new DateTime(2017, 7, 1);
+                                                if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                {//means date is greater than 1 july 2017
+                                                    if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                    {
+                                                        <td class="borderbottom" align="right"><b>IGST Tax Amt.&nbsp;</b></td>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <td class="borderbottom" align="right"><b>CGST Tax Amt.&nbsp;</b></td>
+                                                        <td class="borderbottom" align="right"><b>SGST Tax Amt.&nbsp;</b></td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td class="borderbottom" align="right"><b>Tax Amt.&nbsp;</b></td>
+                                                }
+
+                                            }
+
+
+                                            <td class="borderbottom" align="right"><b>Total Amount</b></td>
+                                        </tr>
+                              
+@foreach (var tax in Model.objTaxSummary)
+{
+                                            <tr class="NoBorder">
+                                                <td class="NoBorder">@tax.HSNCode &nbsp;</td>
+                                                @{
+                                                    CheckDate = new DateTime(2017, 8, 1);
+                                                    if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                    {//means date is greater than 1 jult 2017
+                                                        if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                        {
+
+                                                            <td class="NoBorder" align="right">@tax.SumTaxPer &nbsp;</td>
+
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="NoBorder" align="right">@tax.SumCGSTPer &nbsp;</td>
+                                                            <td class="NoBorder" align="right">@tax.SumSGSTPer &nbsp;</td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="NoBorder" align="right">@tax.SumTaxPer &nbsp;</td>
+                                                    }
+                                                }
+                                                <td class="NoBorder" align="right">@tax.SumAmount&nbsp;</td>
+                                                @{
+                                                    CheckDate = new DateTime(2017, 8, 1);
+                                                    if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                    {//means date is greater than 1 jult 2017
+                                                        if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                        {
+                                                            <td class="NoBorder" align="right">@tax.SumTaxAmt&nbsp;</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="NoBorder" align="right">@tax.SumCGSTAmt&nbsp;</td>
+                                                            <td class="NoBorder" align="right">@tax.SumSGSTAmt&nbsp;</td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="NoBorder" align="right">@tax.SumTaxAmt&nbsp;</td>
+                                                    }
+
+                                                }
+
+
+                                                <td class="NoBorder" align="right">@tax.SumNetPayableAmount</td>
+                                            </tr>
+                                                    }
+
+
+@if (Model.shippingTax != null && Model.shippingTax.objtaxShipping != null)
+{
+    foreach (var tax in Model.shippingTax.objtaxShipping)
+    {
+                                            <tr class="NoBorder">
+                                                <td class="NoBorder">@tax.HSNCode &nbsp;</td>
+                                                @{
+                                                    CheckDate = new DateTime(2017, 8, 1);
+                                                    if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                    {//means date is greater than 1 jult 2017
+                                                        if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                        {
+
+                                                            <td class="NoBorder" align="right">@tax.SumTaxPer &nbsp;</td>
+
+
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="NoBorder" align="right">@tax.SumCGSTPer &nbsp;</td>
+                                                            <td class="NoBorder" align="right">@tax.SumSGSTPer &nbsp;</td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="NoBorder" align="right">@tax.SumTaxPer &nbsp;</td>
+                                                    }
+                                                }
+                                                <td class="NoBorder" align="right">@tax.SumAmount&nbsp;</td>
+                                                @{
+                                                    CheckDate = new DateTime(2017, 8, 1);
+                                                    if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                    {//means date is greater than 1 jult 2017
+                                                        if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                        {
+                                                            <td class="NoBorder" align="right">@tax.SumTaxAmt&nbsp;</td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td class="NoBorder" align="right">@tax.SumCGSTAmt&nbsp;</td>
+                                                            <td class="NoBorder" align="right">@tax.SumSGSTAmt&nbsp;</td>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="NoBorder" align="right">@tax.SumTaxAmt&nbsp;</td>
+                                                    }
+
+                                                }
+
+
+                                                <td class="NoBorder" align="right">@tax.SumNetPayableAmount</td>
+                                            </tr>
+                                                    }
+                                        }
+                                        <tr class="topborder borderbottom">
+
+                                            @{
+                                                CheckDate = new DateTime(2017, 8, 1);
+                                                if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                {//means date is greater than 1 jult 2017
+                                                    if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                    {
+                                                        <td class="topborder borderbottom"><b>Totals</b></td>
+                                                        <td class="topborder borderbottom"></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="topborder borderbottom"><b>Totals</b></td>
+                                                        <td class="topborder borderbottom"></td>
+                                                        <td class="topborder borderbottom">&nbsp;</td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td class="topborder borderbottom"><b>Totals</b></td>
+                                                }
+
+                                            }
+                                            <td class="topborder borderbottom" align="right"><b>@Model.objProduct.TotalTaxableAmt</b></td>
+                                            @{
+                                                CheckDate = new DateTime(2017, 8, 1);
+                                                if ((CheckDate - Model.BillDate.Date).TotalDays <= 0)
+                                                {//means date is greater than 1 jult 2017
+                                                    if (Model.objListProduct[0].TaxType.Trim() == "I")
+                                                    {
+                                                        <td class="topborder borderbottom" align="right"><b>@Model.objProduct.TotalTaxAmount </b></td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td class="topborder borderbottom" align="right"><b>@Model.objProduct.TotalCGSTAmt</b></td>
+                                                        <td class="topborder borderbottom" align="right"><b>@Model.objProduct.TotalSGSTAmt</b></td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td class="topborder borderbottom" align="right"><b>@Model.objProduct.TotalTaxAmount</b></td>
+                                                }
+
+                                            }
+                                            <td class="topborder borderbottom" align="right"><b>@Model.objProduct.TotalNetPayable</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr class="NoBorder"><td colspan='@colcount' class="NoBorder">&nbsp;</td></tr>
+                        @if (Model.objPaymentMode != null)
+                        {
+                            <tr class="NoBorder"><td colspan=@colcount class="NoBorder"><b>Payment Details:</b></td></tr>
+                            <tr class="NoBorder">
+
+                                <td colspan="@colcount" class="NoBorder">
+                                    <table cellspacing="0" class="NoBorder" border="1" style="font-size:12px;width:40%;">
+                                        <tbody>
+                                            <tr class="borderbottom">
+                                                <td class="borderbottom"><b>Payment Mode</b></td>
+                                                <td class="borderbottom"><b>Card No</b></td>
+                                                <td class="borderbottom"><b>Amount</b></td>
+                                            </tr>
+                                            @foreach (var pay in Model.objPaymentMode)
+                                            {
+                                                <tr class="NoBorder">
+                                                    <td class="NoBorder">@pay.PayMode</td>
+                                                    <td class="NoBorder">@pay.CardNo</td>
+                                                    <td class="NoBorder">@pay.Amount</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                        <tr class="NoBorder"><td colspan=@colcount class="NoBorder">&nbsp;</td></tr>
+                        <tr class="NoBorder"><td colspan=@colcount class="NoBorder"><b style="font-size:12px!important;">Rupee @Model.objProduct.TotalAmountString only.</b></td></tr>
+                    </table>
+                </td>
+            </tr>
+
+            @if (!string.IsNullOrEmpty(Model.objCustomer.Remarks))
+            {
+                <tr><td colspan="2" class="borderbottom"><b>Remark:</b>  @Model.objCustomer.Remarks</td></tr>
+            }
+
+
+            <tr>
+                <td width="40%" class="rightBorderOnly addAllPadding" style="font-size:10px">
+                    @*@if (Model.objListProduct[0].CourierName != "")
+                        {
+                            <b>Courier Name: </b>@Model.objListProduct[0].CourierName<br />
+                            <b>Docket No.: </b>@Model.objListProduct[0].DocketNo<br />
+                            <b>Docket Date: </b>@Model.objListProduct[0].DocketDate<br /><br />
+                        }*@
+                    <b><u>Terms & Conditions:</u></b><br />
+                    <span>E. & O.E.</span>
+                    <ol>
+                        <li>
+                            Goods once sold will not be taken back after 30 days.
+                        </li>
+                        <li>
+                            For Terms & Conditions visit at <a href="https://www.vadicindia.com">www.vadicindia.com</a>
+                        </li>
+                        <li>Subject to Ambala jurisdiction only.</li>
+                        <li>Above Mention Prices are inclusive of GST.</li>
+                    </ol>
+                    @*@if (objCon.CompID == "1007")
+                        {
+                            <ol>
+                                <li>
+                                    Goods once sold will not be taken back after 30 days.
+                                </li>
+                                <li>
+                                    For Terms & Conditions visit at <a href="https://www.vadicindia.com">www.vadicindia.com</a>
+                                </li>
+                                <li>Subject to Ambala jurisdiction only.</li>
+                                <li>Above Mention Prices are inclusive of GST.</li>
+                            </ol>
+
+
+                        }
+                        else
+                        {
+                            <ol>
+                                @if (objCon.CompID == "1038")
+                                {
+                                    <li>Goods once sold will not be taken back after 30 days of invoice and if seal is broken.</li>
+                                }
+                                else
+                                {
+                                    <li>Goods once sold will not be taken back.</li>
+                                }
+
+                                <li>Interest @@ 18% p.a. will be charged if the payment is not made with in the stipulated time.</li>
+                                <li>Subject to @Model.CompCity jurisdiction only.</li>
+                            </ol>
+                        }*@
+                </td>
+                <td width="60%">
+                    <table border="1" class="NoBorder">
+                        <tr class="borderbottom">
+                            <td class="borderbottom addAllPadding"><b>Receiver's Signature:</b><br /><br /><br /></td>
+                        </tr>
+                        <tr class="NoBorder">
+                            <td align="right" class="NoBorder addAllPadding">
+                                <br /><b>
+                                    @if (!string.IsNullOrEmpty(Model.SoldByName))
+                                    {@Model.SoldByName}
+                                    <br /><br /><br /><br />
+                                    <span>Authorised Signatory</span>
+                                </b>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <center><span id="lblRegdOffice" align="center" style="font-size:11px;">This is computer generated invoice, doesn't require signature.</span></center>
+</div>

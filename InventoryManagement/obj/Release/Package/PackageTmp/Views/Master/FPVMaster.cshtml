@@ -1,0 +1,450 @@
+﻿@model InventoryManagement.Entity.Common.FPVMaster
+@using InventoryManagement.Common
+@using InventoryManagement.Entity.Common
+@{
+    ViewBag.Title = "FPV Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string CurrentPartyCode = (Session["LoginUser"] as User).PartyCode;
+    string CurrentPartyName = (Session["LoginUser"] as User).PartyName;
+}
+
+<script type="text/javascript">
+    var dialog;
+    var FreeProductArray = [], ItemList=[];
+    var FreeProductgrid = null;
+
+    $(document).ready(function () {
+        $(".preloader").hide();
+        getAllProductNames();
+        getFPVProducts();
+        $("#ProductName").autocomplete({
+            source: function (request, response) {
+                var results = $.ui.autocomplete.filter(ItemList, request.term);
+                response(results.slice(0, 50));
+            },
+            minLength: 1,
+            scroll: true,
+            select: function (event, ui) {
+                $("#ProductName").val(ui.item.label);
+                SetSpecificCode(ui.item.label);
+                return false;
+            },
+            appendTo: $("#AddProductdialog"),
+        }).focus(function () {
+            $(this).autocomplete("search", "");
+        });
+        $("#AddAllProduct").click(function () {
+            var Qty = 0;
+            var FreeQty = 0;
+            var IsFlexible = "Y";
+            $(".preloader").show();
+            $.ajax({
+                type: 'POST',
+                url: '/Product/GetProductList',
+                success: function (resultData) {
+                    if (resultData != null) {
+                        FreeProductArray = [];
+                        for (i = 0; i < resultData.length; i++) {
+                            if (resultData[i].IsActive) {
+                                var product = { "ProdCode": resultData[i].ProductCode, "ProductName": resultData[i].ProductName};
+                                FreeProductArray.push(product);
+                            }
+                        }
+
+                        fillFreeProductGrid();                       
+                        $(".preloader").hide();                        
+                    }                   
+                },
+                error: function (error) {
+                    $(".preloader").hide();
+                    alert(error);
+                }
+
+            });           
+        });
+
+        $("#AddProduct").click(function () {
+            $("#ProductName").val("");
+             $("#ProductCode").val("");
+
+            $("#AddProductdialog").dialog({
+                modal: true,
+                width: "60%"
+            });
+        });
+
+        $("#NoBtn").click(function () {
+            $("#AddProductdialog").dialog('close');
+        });
+        $("form[name=form_fpv]").unbind("submit");
+        $("form[name=form_fpv]").bind('submit', function (e) {
+
+            var validate = true;
+            $("#SaveFPVForm").attr("disabled", true);
+            
+            if (FreeProductArray.length == 0) {
+                OpenDialog("dialogMessage", "Please add product.", "false");
+                $("#SaveFPVForm").attr("disabled", false);
+                validate = false;              
+            }
+            $("#BunchID").val("2");
+            if (validate) {
+                $("#productString").val(JSON.stringify(FreeProductArray));
+                var formdata = new FormData($("#form_fpv")[0]);
+                $(".preloader").show();
+                $.ajax({
+                    url: '@Url.Action("SaveFPV", "Master")',
+                    type: 'POST',
+                    data: formdata,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    success: function (objResponse) {
+                        $("#SaveFPVForm").removeAttr("disabled");
+                        if (objResponse != null) {
+                            if (objResponse.ResponseStatus == "OK") {
+
+                                var link = '@Url.Action("FPVMaster", "Master")';
+
+                                window.location.href = link;
+
+                            }
+                            else {
+                                OpenDialog("dialogMessage", objResponse.ResponseMessage, "false");
+                            }
+                        }
+                        $(".preloader").hide();
+                        return false;
+                    },
+                    error: function (xhr, data) {
+                        //  return false;
+                        $(".preloader").hide();
+                        console.log(xhr);
+                        console.log("Error:", data);
+                    }
+                });
+            }
+            return false;
+        });
+
+        $("#YesBtn").click(function () {
+            var objIndex = 0;
+            
+            var Name = $("#ProductName").val();
+            var code = $("#ProductCode").val();
+
+            var product = { "ProdCode": code, "ProductName": Name };
+
+            if (FreeProductArray.length > 0) {
+                objIndex = FreeProductArray.findIndex((obj => obj.ProdCode == code));
+                if (objIndex === -1) {
+                    FreeProductArray.push(product);
+                }
+                else {
+                    FreeProductArray[objIndex] = product;
+                }
+            }
+            else {
+                FreeProductArray.push(product);
+            }
+            $("#ProductName").val("");
+            $("#ProductCode").val("");
+            fillFreeProductGrid();
+            $("#AddProductdialog").dialog('close');           
+        });
+    });
+
+    function fillFreeProductGrid() {
+
+        $("#noRecord").hide();
+        if (FreeProductgrid != null) {
+            FreeProductgrid.destroy();
+            $('#FreeProductgrid').empty();
+        }
+
+        FreeProductgrid = $('#FreeProductgrid').grid({
+            dataSource: FreeProductArray,
+            uiLibrary: 'bootstrap',
+            headerFilter: false,
+            columns: [
+                { field: 'ProdCode', title: 'Product Code', width: 100, sortable: true, hidden: false, filterable: false },
+                { field: 'ProductName', title: 'Product Name', width: 100, sortable: true, hidden: false, filterable: false },
+                { title: '', field: 'Delete', width: 34, type: 'icon', width: 70, icon: 'glyphicon-remove', tooltip: 'Edit', events: { 'click': Delete }, filterable: false }
+            ],
+            pager: { limit: 20, sizes: [15, 20, 35, 50, 65, 80, 95, 100] }
+        });
+
+    }
+    function SetSpecificCode(label) {
+        var objIndex = FullProductList.findIndex((obj => obj.ProductName == label));
+        if (objIndex != -1) {
+            $("#ProductCode").val(parseFloat(FullProductList[objIndex].ProductCode));
+        }
+    }
+
+    function Delete(ev) {
+        FreeProductArray = $.grep(FreeProductArray, function (e) {
+            return e.ProdCode != ev.data.record.ProdCode;
+        });
+        fillFreeProductGrid();
+    }
+    function OpenDialog(dialogId, Message, isConfirmation) {
+        $("#" + dialogId).empty();
+        $("#" + dialogId).append('<p>' + Message + '</p>');
+        if (isConfirmation == "true") {
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "Yes",
+                    id: "btnYes" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = true;
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                },
+                {
+                    text: "No",
+                    id: "btnNo" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+                        IsYes = false;
+                        $("#" + dialogId).dialog("close");
+                    }
+                }
+                ]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+        else {
+
+
+            $("#" + dialogId).dialog({
+                modal: true,
+                buttons: [{
+                    text: "OK",
+                    id: "btn" + dialogId,
+                    click: function () {
+                        //var isOpen = $("#dialog").dialog("isOpen");
+                        //if (isOpen == true) {
+                        //    okCallBack();
+                        //}
+
+                        $("#" + dialogId).dialog("close");
+
+
+                    }
+                }]
+            });
+            $(".ui-dialog-titlebar-close").empty();
+            $(".ui-dialog-titlebar-close").append('<i class="fa fa-close"></i>');
+        }
+
+    }
+
+    function getAllProductNames() {
+        $.ajax({
+            url: '/Transaction/GetProductList',
+            dataType: 'JSON',
+            method: 'GET',
+            success: function (data) {
+                ItemList = [];
+                if (data != null) {
+                    FullProductList = data;
+                    ItemList = data.map(a => a.ProductName);
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+    function getFPVProducts() {
+        $.ajax({
+            url: '/Master/getFPVProducts',
+            dataType: 'JSON',
+            method: 'GET',
+            success: function (resultData) {
+                if (resultData != null) {
+                    FreeProductArray = [];
+                    for (i = 0; i < resultData.length; i++) {                        
+                        var product = { "ProdCode": resultData[i].ProdID, "ProductName": resultData[i].ProdName };
+                            FreeProductArray.push(product);                        
+                    }
+
+                    fillFreeProductGrid();                    
+                }
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+    
+</script>
+
+<div class="row">
+
+    <div class="clearfix"></div>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Master > FPV Details</h2>
+
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <form id="form_fpv" name="form_fpv" onsubmit="false">
+                       @Html.HiddenFor(m => m.BunchID,new { id = "BunchID",name= "BunchID", value="2" })
+                       @Html.HiddenFor(m => m.productString, new { id = "productString" })
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">BV Value<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.TextBoxFor(m => m.BVValue, new { id = "BVValue", tabindex = "0", @required = "required", name = "BVValue",type="number", @class = "form-control" })                                        
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">On Bill Type<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.DropDownListFor(m => m.OnBillType, new SelectList(ViewBag.OnBillTypeList, "Value", "Text"), "--Select--", new { id = "OnBillType", tabindex = "1", @required = "required", name = "OnBillType", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">FPV<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.TextBoxFor(m => m.FPV, new { id = "FPV", tabindex = "2", @required = "required", name = "FPV", type = "number", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">Is Multiple<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.DropDownListFor(m => m.IsMultiple, new SelectList(ViewBag.IsMultipleList, "Value", "Text"), "--Select--", new { id = "IsMultiple", tabindex = "3", @required = "required", name = "IsMultiple", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">Expired In Days<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.TextBoxFor(m => m.ExpiredinDays, new { id = "ExpiredinDays", tabindex = "4", @required = "required", name = "ExpiredinDays", type = "number", @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row" style="margin-top:1%">
+                                <label class="col-lg-3">Active Status<span style="color:red">*</span></label>
+                                <div class="col-lg-6">
+                                    @Html.DropDownListFor(m => m.ActiveStatus, new SelectList(ViewBag.ActiveOptions, "Value", "Text"), "--Select--", new { id = "ActiveStatus", tabindex = "5", name = "ActiveStatus", @class = "form-control" })                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <br />
+                        
+
+                        <div class="col-lg-12">
+                            &nbsp;
+                        </div>
+                        <div class="col-lg-12">                           
+                            <div class="col-lg-4 form-group">
+                                <input type="button" id="AddAllProduct" name="AddAllProduct" data-type="AddAllProduct" class="cancel btn btn-success" value="Add All Products" tabindex="9" />
+                                <input type="button" id="AddProduct" name="AddProduct" data-type="AddProduct" class="cancel btn btn-success" value="Add Product" tabindex="10" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <center>
+                                    <div class="loader" style="display:none"></div>
+                                </center>
+                                <center><span style="display:none" id="noRecord">No Records Found</span></center>
+                                <br /><br /><br />
+                                <table class="table bootstrap-datatable" id="FreeProductgrid"></table>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12" style="margin-top:1%">
+                            <div class="col-lg-6">
+                                <input type="submit" id="SaveFPVForm" class="btn btn-success" tabindex="0" value="Save">
+                                <button class="btn btn-primary" type="button" tabindex="0" id="cancelClick">Cancel</button>
+                            </div>
+                        </div>
+
+                    </form>
+
+
+
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    <div id="dialogMessage" title="Message">
+
+    </div>
+
+    <div id="AddProductdialog" title="Add Product" style="display:none">
+        <div class="col-lg-12" style="background-color:lightgrey;border:1px black solid;">
+            <span style="width:100%;"><center>Add Product Details: </center></span>
+        </div>
+        <br />
+        <div class="row" style="margin-top:1%">
+            <div class="col-lg-12 form-group">
+
+                <label class="col-lg-6">
+                    Product Code:
+                </label>
+                <div class="col-lg-6">
+                    <input type="text" id="ProductCode" readonly="readonly" class="form-control" />
+                </div>
+            </div>
+
+            <div class="col-lg-12 form-group">
+
+                <label class="col-lg-6">
+                    Product Name:
+                </label>
+                <div class="col-lg-6">
+                    <input type="text" id="ProductName"  class="form-control" />
+                </div>
+            </div>
+            
+        </div>
+        <div class="row" style="margin-top:1%">
+            <div class="col-lg-6 col-lg-offset-3">
+                <button type="button" id="YesBtn" class="btn btn-success" tabindex="0">Yes</button>
+                <button class="btn btn-primary" type="button" id="NoBtn" tabindex="0">No</button>
+            </div>
+        </div>
+    </div>
+
+</div>
