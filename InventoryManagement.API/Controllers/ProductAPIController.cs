@@ -53,7 +53,7 @@ namespace InventoryManagement.API.Controllers
                         objDTCategory.Remarks = "";
                         objDTCategory.Prefix = "";
                         objDTCategory.OnWebSite = "Y";
-                        objDTCategory.ImgPath = "";
+                        objDTCategory.ImgPath = model.ImgPath;
                         //objDTCategory.AlterID = model.UserDetails.UserId;
 
                         if (model.IsAdd == "Add")
@@ -327,6 +327,7 @@ namespace InventoryManagement.API.Controllers
                                                CategoryId = (int)category.CatId,
                                                CategoryName = category.CatName,
                                                Description = category.CatDescription,
+                                               ImgPath = category.ImgPath,
                                                IsActive = category.ActiveStatus == "Y" ? true : false
                                            }
                                            ).ToList();
@@ -340,6 +341,7 @@ namespace InventoryManagement.API.Controllers
                                                CategoryId = (int)category.CatId,
                                                CategoryName = category.CatName,
                                                Description = category.CatDescription,
+                                               ImgPath = category.ImgPath,
                                                IsActive = category.ActiveStatus == "Y" ? true : false
                                            }
                                           ).ToList();
@@ -496,6 +498,27 @@ namespace InventoryManagement.API.Controllers
             }
             return ((int)maxCode + 1);
         }
+        // UI se aaya date string robustly parse karta hai. Picker "DD-MMM-YYYY"
+        // (jaise "30-Jun-2026") bhejta hai; kuch jagah dd-MM-yyyy / dd/MM/yyyy bhi aa
+        // sakta hai. Sab try karke, fail hone par aaj ki date de deta hai.
+        private DateTime ParseUiDate(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return DateTime.Now;
+            s = s.Trim();
+            string[] formats =
+            {
+        "dd-MMM-yyyy", "d-MMM-yyyy", "dd-MM-yyyy", "dd/MM/yyyy",
+        "yyyy-MM-dd", "MM/dd/yyyy", "dd-MMM-yyyy HH:mm:ss"
+    };
+            DateTime dt;
+            if (DateTime.TryParseExact(s, formats, CultureInfo.InvariantCulture,
+                                       DateTimeStyles.None, out dt))
+                return dt;
+            if (DateTime.TryParse(s, CultureInfo.InvariantCulture,
+                                  DateTimeStyles.None, out dt))
+                return dt;
+            return DateTime.Now;   // last resort, taaki save kabhi crash na ho
+        }
 
         public ResponseDetail SaveProductMaster(ProductDetails model)
         {
@@ -587,7 +610,7 @@ namespace InventoryManagement.API.Controllers
                         objDTProduct.Prefix = "";
                         objDTProduct.ItemType = "";
                         objDTProduct.BuyingTax = 0;
-                        objDTProduct.Weight = 0;
+                        //objDTProduct.Weight = 0;
                         objDTProduct.PurchaseRate = model.ProductBarcodeDetails.PurchaseRate;
                         objDTProduct.DP1 = 0;
                         objDTProduct.OtherStateDP = 0;
@@ -644,11 +667,11 @@ namespace InventoryManagement.API.Controllers
                         objDTProduct.SubQty = 0;
                         objDTProduct.CalcKitRate = "N";
                         objDTProduct.FlexiQty = 0;
-                        objDTProduct.ImgPath1 = "";
-                        objDTProduct.ImgPath2 = "";
-                        objDTProduct.ImgPath3 = "";
-                        objDTProduct.ImgPath4 = "";
-                        objDTProduct.ImgPath5 = "";
+                        //objDTProduct.ImgPath1 = "";
+                        //objDTProduct.ImgPath2 = "";
+                        //objDTProduct.ImgPath3 = "";
+                        //objDTProduct.ImgPath4 = "";
+                        //objDTProduct.ImgPath5 = "";
                         objDTProduct.AlterID = model.UserDetails.UserId;
                         // objDTProduct.UnitID = 3;
                         // objDTProduct.UnitName = "Pc.";
@@ -659,22 +682,30 @@ namespace InventoryManagement.API.Controllers
                         DateTime ExpDate = DateTime.Now;
                         if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.MfgDateStr))
                         {
-                            var date = Convert.ToDateTime(model.ProductBarcodeDetails.MfgDateStr);
-                            var SplitDate = date.ToString().Split('-');
-                            string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
-                            var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
-                            MfgDate = Convert.ToDateTime(NewDate1);
-                            MfgDate = MfgDate.Date;
+                            MfgDate = ParseUiDate(model.ProductBarcodeDetails.MfgDateStr).Date;
                         }
+                        //if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.MfgDateStr))
+                        //{
+                        //    var date = Convert.ToDateTime(model.ProductBarcodeDetails.MfgDateStr);
+                        //    var SplitDate = date.ToString().Split('-');
+                        //    string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
+                        //    var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+                        //    MfgDate = Convert.ToDateTime(NewDate1);
+                        //    MfgDate = MfgDate.Date;
+                        //}
                         if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.ExpDateStr))
                         {
-                            var date = Convert.ToDateTime(model.ProductBarcodeDetails.ExpDateStr);
-                            var SplitDate = date.ToString().Split('-');
-                            string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
-                            var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
-                            ExpDate = Convert.ToDateTime(NewDate1);
-                            ExpDate = ExpDate.Date;
+                            ExpDate = ParseUiDate(model.ProductBarcodeDetails.ExpDateStr).Date;
                         }
+                        //if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.ExpDateStr))
+                        //{
+                        //    var date = Convert.ToDateTime(model.ProductBarcodeDetails.ExpDateStr);
+                        //    var SplitDate = date.ToString().Split('-');
+                        //    string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
+                        //    var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+                        //    ExpDate = Convert.ToDateTime(NewDate1);
+                        //    ExpDate = ExpDate.Date;
+                        //}
                         objDTProduct.MfgDate = MfgDate.Date;
                         objDTProduct.ExpDate = ExpDate.Date;
                         // objDTProduct.ProductBarcodeId = ProductBarcodeId;
@@ -970,12 +1001,12 @@ namespace InventoryManagement.API.Controllers
                             objDTProduct.HotSell = model.HotSell;
                             if (string.IsNullOrEmpty(model.ProductImagePath) == false)
 
-                                objDTProduct.ImagePath = string.IsNullOrEmpty(model.ProductImagePath) ? "" : model.ProductImagePath;
-                            objDTProduct.ImgPath1 = string.IsNullOrEmpty(model.ProductImagePath1) ? "" : model.ProductImagePath1;
-                            objDTProduct.ImgPath2 = string.IsNullOrEmpty(model.ProductImagePath2) ? "" : model.ProductImagePath2;
-                            objDTProduct.ImgPath3 = string.IsNullOrEmpty(model.ProductImagePath3) ? "" : model.ProductImagePath3;
-                            objDTProduct.ImgPath4 = string.IsNullOrEmpty(model.ProductImagePath4) ? "" : model.ProductImagePath4;
-                            objDTProduct.ImgPath5 = string.IsNullOrEmpty(model.ProductImagePath5) ? "" : model.ProductImagePath5;
+                                objDTProduct.ImagePath = string.IsNullOrEmpty(model.ProductImagePath) ? "" : model.ProductImagePath.Replace("/ProductImages/", "");
+                            objDTProduct.ImgPath1 = string.IsNullOrEmpty(model.ProductImagePath1) ? "" : model.ProductImagePath1.Replace("/ProductImages/", "");
+                            objDTProduct.ImgPath2 = string.IsNullOrEmpty(model.ProductImagePath2) ? "" : model.ProductImagePath2.Replace("/ProductImages/", "");
+                            objDTProduct.ImgPath3 = string.IsNullOrEmpty(model.ProductImagePath3) ? "" : model.ProductImagePath3.Replace("/ProductImages/", "");
+                            objDTProduct.ImgPath4 = string.IsNullOrEmpty(model.ProductImagePath4) ? "" : model.ProductImagePath4.Replace("/ProductImages/", "");
+                            objDTProduct.ImgPath5 = string.IsNullOrEmpty(model.ProductImagePath5) ? "" : model.ProductImagePath5.Replace("/ProductImages/", "");
 
                             objDTProduct.IsImage = string.IsNullOrEmpty(model.ProductImagePath) ? "N" : "Y";
                             objDTProduct.ActiveStatus = model.IsActive ? "Y" : "N";
@@ -1061,33 +1092,41 @@ namespace InventoryManagement.API.Controllers
                             DateTime ExpDate = DateTime.Now;
                             if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.MfgDateStr))
                             {
-                                var date = Convert.ToDateTime(model.ProductBarcodeDetails.MfgDateStr);
-                                var SplitDate = date.ToString().Split('-');
-                                string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
-                                var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
-                                MfgDate = Convert.ToDateTime(NewDate1);
-
-                                //var SplitDate = model.ProductBarcodeDetails.MfgDateStr.Split('-');
-                                //string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
-                                //var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy", CultureInfo.InvariantCulture));
-                                //MfgDate = Convert.ToDateTime(NewDate1);
-                                MfgDate = MfgDate.Date;
+                                MfgDate = ParseUiDate(model.ProductBarcodeDetails.MfgDateStr).Date;
                             }
+                            //if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.MfgDateStr))
+                            //{
+                            //    var date = Convert.ToDateTime(model.ProductBarcodeDetails.MfgDateStr);
+                            //    var SplitDate = date.ToString().Split('-');
+                            //    string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
+                            //    var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+                            //    MfgDate = Convert.ToDateTime(NewDate1);
+
+                            //    //var SplitDate = model.ProductBarcodeDetails.MfgDateStr.Split('-');
+                            //    //string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
+                            //    //var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy", CultureInfo.InvariantCulture));
+                            //    //MfgDate = Convert.ToDateTime(NewDate1);
+                            //    MfgDate = MfgDate.Date;
+                            //}
                             if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.ExpDateStr))
                             {
-                                var date = Convert.ToDateTime(model.ProductBarcodeDetails.ExpDateStr);
-                                var SplitDate = date.ToString().Split('-');
-                                string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
-                                var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
-                                ExpDate = Convert.ToDateTime(NewDate1);
-                                ExpDate = ExpDate.Date;
-                                //var SplitDate = model.ProductBarcodeDetails.ExpDateStr.Split('-');
-                                //string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
-
-                                //var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy", CultureInfo.InvariantCulture));
-                                //ExpDate = Convert.ToDateTime(NewDate1);
-                                //ExpDate = ExpDate.Date;
+                                ExpDate = ParseUiDate(model.ProductBarcodeDetails.ExpDateStr).Date;
                             }
+                            //if (!string.IsNullOrEmpty(model.ProductBarcodeDetails.ExpDateStr))
+                            //{
+                            //    var date = Convert.ToDateTime(model.ProductBarcodeDetails.ExpDateStr);
+                            //    var SplitDate = date.ToString().Split('-');
+                            //    string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
+                            //    var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture));
+                            //    ExpDate = Convert.ToDateTime(NewDate1);
+                            //    ExpDate = ExpDate.Date;
+                            //    //var SplitDate = model.ProductBarcodeDetails.ExpDateStr.Split('-');
+                            //    //string NewDate = SplitDate[1] + "/" + SplitDate[0] + "/" + SplitDate[2];
+
+                            //    //var NewDate1 = Convert.ToDateTime(DateTime.ParseExact(NewDate, "MM/dd/yyyy", CultureInfo.InvariantCulture));
+                            //    //ExpDate = Convert.ToDateTime(NewDate1);
+                            //    //ExpDate = ExpDate.Date;
+                            //}
                             objDTProduct.MfgDate = MfgDate.Date;
                             objDTProduct.ExpDate = ExpDate.Date;
                             objDTProduct.ProductLink = model.ProductLink;

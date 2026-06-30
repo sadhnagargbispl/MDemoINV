@@ -122,6 +122,7 @@
             }
         });
         //binds to onchange event of your input field
+
         $(".upload").on("change", function(e) {        
             if (this.files) {
                 filelists = e.target.files;
@@ -201,6 +202,12 @@
                     link = '@Url.Action("DeleteProductMaster", "Product")';
                 }
                 if (ErrorFlag) {
+                    debugger;
+                    // CKEditor ka content underlying <textarea> me sync karo,
+                    // warna FormData me ProductDescription null/empty jaata hai.
+                    if (window.CKEDITOR && CKEDITOR.instances["ProductDescription"]) {
+                        CKEDITOR.instances["ProductDescription"].updateElement();
+                    }
                     var formdata = new FormData($(this)[0]);
                     console.log("form data = > " + formdata);
                     $.ajax({
