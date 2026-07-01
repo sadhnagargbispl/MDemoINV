@@ -104,5 +104,10 @@ namespace InventoryManagement.API.Models
         public string AllowedForGPV { get; set; }
         public string ProductLink { get; set; }
         public string UOM { get; set; }
+        public int ImgFlag { get; set; }
+        public int BunchQty { get; set; }
+        public int IsbunchQtyFlg { get; set; }
+        public string ProductColor { get; set; }
+        public string ProductSize { get; set; }
     }
 }

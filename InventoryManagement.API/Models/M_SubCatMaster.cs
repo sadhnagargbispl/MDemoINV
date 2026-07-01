@@ -27,5 +27,6 @@ namespace InventoryManagement.API.Models
         public string OnWebSite { get; set; }
         public string OfferHtml { get; set; }
         public string IsForPC { get; set; }
+        public string ImgPath { get; set; }
     }
 }

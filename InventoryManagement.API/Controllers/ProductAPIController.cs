@@ -157,7 +157,7 @@ namespace InventoryManagement.API.Controllers
                         //objDTSubCategory.Description = model.Description;
                         objDTSubCategory.CatId = model.CategoryId;
                         objDTSubCategory.ActiveStatus = model.IsActive ? "Y" : "N";
-
+                        objDTSubCategory.ImgPath = model.ImgPath;
                         objDTSubCategory.UserId = model.UserDetails.UserId;
                         objDTSubCategory.LastModified = DateTime.Now.ToString();
                         if (model.IsAdd == "Add")
@@ -387,6 +387,7 @@ namespace InventoryManagement.API.Controllers
                                                          CategoryName = c.CatName,
                                                          IsActive = sc.ActiveStatus == "Y" ? true : false,
                                                          Description = sc.Description,
+                                                         ImgPath = sc.ImgPath,
                                                          subCategoryName = sc.SubCatName
                                                      }).ToList();
                         }
@@ -403,6 +404,7 @@ namespace InventoryManagement.API.Controllers
                                                          CategoryId = (int)sc.CatId,
                                                          CategoryName = c.CatName,
                                                          Description = sc.Description,
+                                                         ImgPath = sc.ImgPath,
                                                          IsActive = sc.ActiveStatus == "Y" ? true : false,
                                                          subCategoryName = sc.SubCatName
                                                      }).ToList();
@@ -424,6 +426,7 @@ namespace InventoryManagement.API.Controllers
                                                          CategoryName = c.CatName,
                                                          IsActive = sc.ActiveStatus == "Y" ? true : false,
                                                          subCategoryName = sc.SubCatName,
+                                                         ImgPath = sc.ImgPath,
                                                          Description = sc.Description,
                                                      }).ToList();
                         }
@@ -442,6 +445,7 @@ namespace InventoryManagement.API.Controllers
                                                          CategoryName = c.CatName,
                                                          IsActive = sc.ActiveStatus == "Y" ? true : false,
                                                          subCategoryName = sc.SubCatName,
+                                                         ImgPath = sc.ImgPath,
                                                          Description = sc.Description
                                                      }).ToList();
                         }

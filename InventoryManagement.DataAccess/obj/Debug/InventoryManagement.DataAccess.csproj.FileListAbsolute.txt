@@ -112,7 +112,6 @@ F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryMana
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.csprojResolveAssemblyReference.cache
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.dll
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.pdb
-E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\roslyn\csc.exe
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
@@ -146,8 +145,12 @@ E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\Newtonsof
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\Microsoft.Owin.Security.Cookies.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.Http.Owin.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.Http.WebHost.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.Razor.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.WebPages.Razor.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.WebPages.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\Microsoft.Web.Infrastructure.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\WebGrease.dll
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.WebPages.Deployment.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\Antlr3.Runtime.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\InventoryManagement.API.pdb
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\InventoryManagement.Entity.pdb
@@ -167,5 +170,6 @@ E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\Microsoft
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.Http.Owin.xml
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\System.Web.Http.WebHost.xml
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\bin\Antlr3.Runtime.pdb
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.DataAccess\obj\Debug\InventoryManagement.DataAccess.pdb

@@ -200,7 +200,7 @@
                         { field: 'BankName', title: 'Bank Name', width: 50, sortable: true, hidden: false, filterable: true },
                         { field: 'BranchName', title: 'Branch Name', width: 50, sortable: true, hidden: true, filterable: false },
                         { field: 'Remarks', title: 'Remarks', width: 50, sortable: true, hidden: false, filterable: false },
-                        { title: 'Image File', width: 70, tmpl: '<a target="_blank" style="text-decoration:underline;" href={ScannedFileName} rel="group" class="fbox"><img src={ScannedFileName} style="height:50px;" /></a> ', align: 'center', filterable: false },
+                        { title: 'Image File', width: 70, tmpl: '<img src="{ScannedFileName}" style="height:50px;cursor:pointer;" onclick="ShowImagePopup(this.src)" alt="No Image" />', align: 'center', filterable: false },
                         { field: 'IsApproved', title: 'IsApproved', width: 10, sortable: true, hidden: true, filterable: false },
                         { field: 'Approved', title: 'Is Approved', editor: { dataSource: IsApprove, valueField: 'value' }, type: 'dropdown', width: 100, sortable: true, hidden: false, filterable: true },
                         { field: 'ApproveRemark', title: 'Approve Remark', width: 200, editor: true, hidden: false, filterable: false },
@@ -222,6 +222,29 @@
                 }
 
             });            
+    }
+    function ShowImagePopup(src) {
+        if (!src) return;
+
+        var overlay = document.getElementById("imgLightbox");
+        if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.id = "imgLightbox";
+            overlay.style.cssText = "display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;text-align:center;cursor:zoom-out;";
+            overlay.innerHTML =
+                '<span id="imgLightboxClose" style="position:absolute;top:15px;right:30px;color:#fff;font-size:40px;cursor:pointer;line-height:1;">&times;</span>' +
+                '<img id="imgLightboxImg" src="" style="max-width:90%;max-height:90%;margin-top:2%;box-shadow:0 0 20px #000;" />';
+            document.body.appendChild(overlay);
+
+            // background ya cross par click -> band
+            overlay.addEventListener("click", function () { overlay.style.display = "none"; });
+            // image par click -> band na ho (zoom dekhne ke liye)
+            overlay.querySelector("#imgLightboxImg")
+                   .addEventListener("click", function (e) { e.stopPropagation(); });
+        }
+
+        document.getElementById("imgLightboxImg").src = src;
+        overlay.style.display = "block";
     }
 </script>
 

@@ -40,5 +40,6 @@ namespace InventoryManagement.API.Models
         public decimal Val2 { get; set; }
         public System.DateTime TRecTimeStamp { get; set; }
         public string TDetail { get; set; }
+        public Nullable<decimal> PV { get; set; }
     }
 }

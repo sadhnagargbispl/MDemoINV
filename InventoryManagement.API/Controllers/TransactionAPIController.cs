@@ -13930,8 +13930,14 @@ FROM TrnVoucher WITH (UPDLOCK, HOLDLOCK);";
                     }
                 }
             }
-            catch (DbEntityValidationException ex)
+            catch (System.Data.Entity.Validation.DbEntityValidationException ex)
             {
+                var errors = ex.EntityValidationErrors
+                    .SelectMany(e => e.ValidationErrors)
+                    .Select(v => v.PropertyName + ": " + v.ErrorMessage);
+                objResponse.ResponseStatus = "FAILED";
+                objResponse.ResponseMessage = string.Join(" | ", errors);
+
                 try
                 {
                     using (var entity = new InventoryEntities())
@@ -13961,9 +13967,42 @@ FROM TrnVoucher WITH (UPDLOCK, HOLDLOCK);";
                 {
 
                 }
-
+                // (aapka TrnVoucher rollback code yahin andar rakh sakti hain)
             }
-            return objResponse;
+            //catch (DbEntityValidationException ex)
+            //{
+            //    try
+            //    {
+            //        using (var entity = new InventoryEntities())
+            //        {
+            //            foreach (var record in objModelList)
+            //            {
+            //                if (record.IsApproved != "N")
+            //                {
+            //                    var obj = (from r in entity.WalletReqs where r.ReqNo.ToString() == record.ReqNo select r).FirstOrDefault();
+            //                    if (obj.IsApprove == "N")
+            //                    {
+            //                        if (SC1.State == ConnectionState.Closed)
+            //                            SC1.Open();
+            //                        string Sql = ";Delete FROM TrnVoucher WHERE RefNo='WReq/" + record.ReqNo + "'";
+            //                        SqlCommand cmd = new SqlCommand();
+            //                        cmd.CommandText = Sql;
+            //                        cmd.Connection = SC1;
+            //                        cmd.ExecuteNonQuery();
+
+                //                    }
+                //                }
+                //            }
+                //            SC1.Close();
+                //        }
+                //    }
+                //    catch (Exception)
+                //    {
+
+                //    }
+
+                //}
+                return objResponse;
         }
 
         public ResponseDetail RejectWalletRequest(string ReqNo, string RejectReason, int UserID)

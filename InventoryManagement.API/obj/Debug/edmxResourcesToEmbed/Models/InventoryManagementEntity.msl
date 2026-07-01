@@ -1786,6 +1786,7 @@
     <EntitySetMapping Name="M_SubCatMaster">
       <EntityTypeMapping TypeName="InventoryModel.M_SubCatMaster">
         <MappingFragment StoreEntitySet="M_SubCatMaster">
+          <ScalarProperty Name="ImgPath" ColumnName="ImgPath" />
           <ScalarProperty Name="IsForPC" ColumnName="IsForPC" />
           <ScalarProperty Name="OfferHtml" ColumnName="OfferHtml" />
           <ScalarProperty Name="OnWebSite" ColumnName="OnWebSite" />
@@ -4936,6 +4937,7 @@
     <EntitySetMapping Name="TempBatchMasters">
       <EntityTypeMapping TypeName="InventoryModel.TempBatchMaster">
         <MappingFragment StoreEntitySet="TempBatchMaster">
+          <ScalarProperty Name="PV" ColumnName="PV" />
           <ScalarProperty Name="TDetail" ColumnName="TDetail" />
           <ScalarProperty Name="TRecTimeStamp" ColumnName="TRecTimeStamp" />
           <ScalarProperty Name="Val2" ColumnName="Val2" />
@@ -7271,6 +7273,11 @@
     <EntitySetMapping Name="M_ProductMaster">
       <EntityTypeMapping TypeName="InventoryModel.M_ProductMaster">
         <MappingFragment StoreEntitySet="M_ProductMaster">
+          <ScalarProperty Name="ProductSize" ColumnName="ProductSize" />
+          <ScalarProperty Name="ProductColor" ColumnName="ProductColor" />
+          <ScalarProperty Name="IsbunchQtyFlg" ColumnName="IsbunchQtyFlg" />
+          <ScalarProperty Name="BunchQty" ColumnName="BunchQty" />
+          <ScalarProperty Name="ImgFlag" ColumnName="ImgFlag" />
           <ScalarProperty Name="UOM" ColumnName="UOM" />
           <ScalarProperty Name="ProductLink" ColumnName="ProductLink" />
           <ScalarProperty Name="AllowedForGPV" ColumnName="AllowedForGPV" />

@@ -194,7 +194,6 @@ F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryMana
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement\obj\Debug\InventoryManagement.csprojResolveAssemblyReference.cache
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement\obj\Debug\InventoryManagement.dll
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement\obj\Debug\InventoryManagement.pdb
-E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\obj\Debug\InventoryManagement.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\roslyn\csc.exe
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
@@ -290,5 +289,6 @@ E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\System.Net.Http.Form
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\InventoryManagement.API.pdb
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\System.Web.Http.Owin.xml
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\bin\System.Web.Http.WebHost.xml
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\obj\Debug\InventoryManagement.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\obj\Debug\InventoryManagement.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement\obj\Debug\InventoryManagement.pdb

@@ -54,5 +54,6 @@ E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\InventoryMana
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\InventoryManagement.Entity.pdb
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Entity\obj\Debug\InventoryManagement.Entity.pdb

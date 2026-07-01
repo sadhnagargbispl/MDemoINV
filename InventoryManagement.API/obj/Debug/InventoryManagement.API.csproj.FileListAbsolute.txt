@@ -160,7 +160,6 @@ F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryMana
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.API\obj\Debug\InventoryManagement.API.csprojResolveAssemblyReference.cache
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.API\obj\Debug\InventoryManagement.API.dll
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.API\obj\Debug\InventoryManagement.API.pdb
-E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\obj\Debug\InventoryManagement.API.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\roslyn\csc.exe
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
@@ -239,5 +238,6 @@ E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\Microsoft.Owin.S
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\Microsoft.Owin.Security.Twitter.xml
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\Microsoft.Owin.Security.MicrosoftAccount.xml
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\bin\System.Web.Http.Owin.xml
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\obj\Debug\InventoryManagement.API.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\obj\Debug\InventoryManagement.API.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.API\obj\Debug\InventoryManagement.API.pdb

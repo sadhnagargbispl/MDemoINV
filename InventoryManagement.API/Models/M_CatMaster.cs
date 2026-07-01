@@ -11,6 +11,7 @@ namespace InventoryManagement.API.Models
 {
     using System;
     using System.Collections.Generic;
+    
     public partial class M_CatMaster
     {
         public decimal CatId { get; set; }
@@ -28,24 +29,5 @@ namespace InventoryManagement.API.Models
         public string DelCharge { get; set; }
         public decimal WebSequence { get; set; }
         public string ImgPath { get; set; }
-        public string TRNDATA { get; set; }
     }
-    //public partial class M_CatMaster
-    //{
-    //    public decimal CatId { get; set; }
-    //    public string CatName { get; set; }
-    //    public string Prefix { get; set; }
-    //    public string CatDescription { get; set; }
-    //    public string Remarks { get; set; }
-    //    public string ActiveStatus { get; set; }
-    //    public string Company { get; set; }
-    //    public decimal UserId { get; set; }
-    //    public System.DateTime RecTimeStamp { get; set; }
-    //    public string LastModified { get; set; }
-    //    public string OnWebSite { get; set; }
-    //    public string IsForPC { get; set; }
-    //    public string DelCharge { get; set; }
-    //    public decimal WebSequence { get; set; }
-    //    public string ImgPath { get; set; }
-    //}
 }

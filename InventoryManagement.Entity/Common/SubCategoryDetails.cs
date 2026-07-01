@@ -19,5 +19,7 @@ namespace InventoryManagement.Entity.Common
         public string subCategoryName { get; set; }
         public User UserDetails { get; set; }
         public string CategoryName { get; set; }
+        public string ImgPath { get; set; }
+        public HttpPostedFileBase upload { get; set; }
     }
 }

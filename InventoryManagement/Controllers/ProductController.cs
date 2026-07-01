@@ -122,20 +122,52 @@ namespace InventoryManagement.Controllers
 
         // POST: SaveSubCategoryMaster
         [HttpPost]
+        [ValidateInput(false)]
         public ActionResult SaveSubCategoryMaster(SubCategoryDetails model)
         {
             ResponseDetail objResponse = new ResponseDetail();
-
-            if (model != null)
+            try
             {
-                if (Session["LoginUser"] != null)
+                if (model.upload != null && !string.IsNullOrEmpty(model.upload.FileName)
+                    && !model.upload.FileName.Contains("DefaultProduct.jpg"))
                 {
-                    model.UserDetails = Session["LoginUser"] as User;
+                    var path = Server.MapPath("~/SubCategoryImages");
+                    if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+
+                    string ext = Path.GetExtension(model.upload.FileName);
+                    if (ext != null && ext.Length > 6) ext = ext.Substring(0, 6);
+                    string myfile = DateTime.Now.ToString("yyyyMMddHHmmssfff") + ext;  // ~21 chars
+                    model.upload.SaveAs(Path.Combine(path, myfile));
+                    model.ImgPath = myfile;
                 }
+
+                if (Session["LoginUser"] != null)
+                    model.UserDetails = Session["LoginUser"] as User;
+
                 objResponse = objProductManager.AddSubCategoryDetails(model);
+            }
+            catch (Exception ex)
+            {
+                objResponse.ResponseStatus = "FAILED";
+                objResponse.ResponseMessage = ex.ToString();
             }
             return Json(objResponse, JsonRequestBehavior.AllowGet);
         }
+        //[HttpPost]
+        //public ActionResult SaveSubCategoryMaster(SubCategoryDetails model)
+        //{
+        //    ResponseDetail objResponse = new ResponseDetail();
+
+        //    if (model != null)
+        //    {
+        //        if (Session["LoginUser"] != null)
+        //        {
+        //            model.UserDetails = Session["LoginUser"] as User;
+        //        }
+        //        objResponse = objProductManager.AddSubCategoryDetails(model);
+        //    }
+        //    return Json(objResponse, JsonRequestBehavior.AllowGet);
+        //}
 
         [HttpPost]
         public ActionResult GetFullSubCategoryList()

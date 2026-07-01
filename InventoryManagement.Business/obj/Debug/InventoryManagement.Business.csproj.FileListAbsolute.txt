@@ -136,7 +136,6 @@ F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryMana
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.csprojResolveAssemblyReference.cache
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.dll
 F:\Newproject_Demo\voice\latestUpdate\DV9_Inv_Full_Project\Dv9_Inv\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.pdb
-E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\roslyn\csc.exe
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
@@ -203,5 +202,6 @@ E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\System.Web.
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\System.Web.WebPages.xml
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\Antlr3.Runtime.pdb
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\bin\System.Web.WebPages.Deployment.xml
+E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.csprojResolveAssemblyReference.cache
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.dll
 E:\Sadhna Garg\Demo_Github\MDemoINV\InventoryManagement.Business\obj\Debug\InventoryManagement.Business.pdb
